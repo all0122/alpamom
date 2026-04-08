@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🔥 알파경제맘 프로젝트</title>
+
+  <!-- Supabase JS v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" onerror="window.__supabaseLoadFailed=true"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Bebas+Neue&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ===== CSS VARIABLES ===== */
+    :root {
+      --gold:        #f59e0b;
+      --gold-light:  #fde68a;
+      --gold-dim:    rgba(245,158,11,0.15);
+      --gold-border: rgba(245,158,11,0.3);
+      --navy:        #0c1220;
+      --card:        #1a2235;
+      --card-hover:  #223044;
+      --border:      rgba(255,255,255,0.07);
+      --text:        #f0f4fa;
+      --muted:       #64748b;
+      --success:     #10b981;
+      --danger:      #ef4444;
+      --r:           16px;
+      --r-sm:        10px;
+      --shadow:      0 4px 24px rgba(0,0,0,0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      background: var(--navy);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    .display { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em; }
+
+    /* ===== SPINNER ===== */
+    .spinner-wrap {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+    }
+    .spinner {
+      width: 42px; height: 42px;
+      border: 3px solid var(--gold-border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-label { color: var(--muted); font-size: 13px; }
+
+    /* ===== HEADER ===== */
+    .hdr {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(12,18,32,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px;
+    }
+    .hdr-brand { line-height: 1.2; }
+    .hdr-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--gold); letter-spacing: 1px; }
+    .hdr-sub   { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .hdr-actions { display: flex; gap: 6px; }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: block; width: 100%;
+      border: none; border-radius: var(--r-sm);
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all .18s;
+    }
+    .btn-gold {
+      background: var(--gold); color: var(--navy);
+      padding: 15px;
+    }
+    .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-gold:active { transform: translateY(0); }
+    .btn-gold:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-outline {
+      background: transparent; color: var(--gold);
+      border: 1px solid var(--gold-border);
+      padding: 13px;
+    }
+    .btn-outline:hover { background: var(--gold-dim); }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 8px 13px;
+      font-size: 12px;
+      border-radius: 8px;
+      width: auto;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+    .btn-icon-gold {
+      background: var(--gold-dim);
+      border: 1px solid var(--gold-border);
+      color: var(--gold);
+      padding: 8px 13px;
+      font-size: 12px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all .18s;
+      white-space: nowrap;
+    }
+    .btn-icon-gold:hover { background: rgba(245,158,11,0.25); }
+
+    /* ===== FORMS ===== */
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.3px; }
+    .form-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 13px 15px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'Noto Sans KR', sans-serif;
+      outline: none;
+      transition: border-color .18s, background .18s;
+    }
+    .form-input:focus {
+      border-color: var(--gold);
+      background: var(--gold-dim);
+    }
+    .form-input[type="date"] { color-scheme: dark; }
+    .err-msg { color: #f87171; font-size: 12px; margin-top: 8px; text-align: center; min-height: 16px; }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+    }
+    .card-gold { border-color: var(--gold-border); }
+
+    /* ===== LOGIN ===== */
+    #v-login {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px 24px;
+      gap: 32px;
+    }
+    .login-hero { text-align: center; }
+    .login-fire {
+      font-size: 68px; line-height: 1; margin-bottom: 14px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .login-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 38px; letter-spacing: 2px; color: var(--gold);
+      line-height: 1;
+    }
+    .login-tagline { font-size: 13px; color: var(--muted); margin-top: 8px; }
+    .login-box { width: 100%; max-width: 360px; padding: 26px 22px; }
+
+    /* ===== HOME ===== */
+    .home-hero {
+      background: linear-gradient(160deg, var(--card) 0%, #162133 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 22px 18px 24px;
+    }
+    .greeting { font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+    .username  { font-size: 21px; font-weight: 700; margin-bottom: 20px; }
+
+    .prog-track { background: rgba(255,255,255,0.08); border-radius: 100px; height: 7px; overflow: hidden; margin-bottom: 7px; }
+    .prog-bar   { height: 100%; background: linear-gradient(90deg, var(--gold), #fbbf24); border-radius: 100px; transition: width .7s ease; }
+    .prog-meta  { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+    .prog-pct   { font-weight: 700; color: var(--gold); }
+
+    /* Day Grid */
+    .sec { padding: 20px 16px 0; }
+    .sec-title { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 14px; }
+
+    .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; }
+
+    .dc {
+      aspect-ratio: 1;
+      border-radius: 11px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      border: 1px solid transparent;
+      transition: all .18s;
+      cursor: pointer;
+    }
+    .dc-n  { font-family: 'Bebas Neue', sans-serif; font-size: 20px; line-height: 1; }
+    .dc-ic { font-size: 12px; margin-top: 1px; }
+
+    .dc-done   { background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.3); }
+    .dc-done   .dc-n { color: var(--success); }
+    .dc-open   { background: var(--gold-dim); border-color: var(--gold-border); }
+    .dc-open   .dc-n { color: var(--gold); }
+    .dc-open:hover { background: rgba(245,158,11,0.22); transform: scale(1.06); }
+    .dc-today  { background: var(--gold); border-color: var(--gold); box-shadow: 0 4px 18px rgba(245,158,11,0.45); }
+    .dc-today  .dc-n, .dc-today .dc-ic { color: var(--navy); }
+    .dc-today:hover { transform: scale(1.06); }
+    .dc-locked { background: rgba(71,85,105,0.2); border-color: rgba(71,85,105,0.2); cursor: not-allowed; }
+    .dc-locked .dc-n { color: #3d4f63; }
+    .dc-locked .dc-ic { color: #3d4f63; }
+
+    /* Today Card */
+    .today-wrap { padding: 14px 16px 24px; }
+    .today-card { padding: 20px 18px; }
+    .today-hd { margin-bottom: 16px; }
+    .today-label { font-size: 16px; font-weight: 700; color: var(--gold); margin-bottom: 3px; }
+    .today-date  { font-size: 12px; color: var(--muted); }
+
+    .checks { display: flex; flex-direction: column; gap: 10px; }
+    .ck {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 15px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      cursor: pointer; transition: all .18s;
+    }
+    .ck:hover { background: rgba(255,255,255,0.07); }
+    .ck.ck-on  { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); }
+    .ck-box {
+      width: 22px; height: 22px; border-radius: 6px;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; flex-shrink: 0; transition: all .18s;
+    }
+    .ck.ck-on .ck-box { background: var(--success); border-color: var(--success); }
+    .ck-em  { font-size: 18px; flex-shrink: 0; }
+    .ck-lbl { font-size: 14px; font-weight: 500; flex: 1; }
+
+    .share-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--gold-dim); border: 1px solid var(--gold-border);
+      border-radius: 10px; padding: 11px 13px;
+    }
+    .share-txt { font-size: 12px; color: var(--gold-light); flex: 1; white-space: pre-line; line-height: 1.6; word-break: keep-all; }
+    .copy-btn  {
+      background: var(--gold); color: var(--navy);
+      border: none; border-radius: 7px;
+      padding: 8px 12px; font-size: 12px; font-weight: 700;
+      font-family: 'Noto Sans KR', sans-serif; cursor: pointer;
+      white-space: nowrap; flex-shrink: 0; transition: all .18s;
+    }
+    .copy-btn:hover { background: var(--gold-light); }
+
+    /* Spacer */
+    .pb32 { height: 32px; }
+
+    /* ===== MODAL SHEET ===== */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 200;
+      display: flex; align-items: flex-end; justify-content: center;
+      animation: fade-in .2s ease;
+    }
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    .sheet {
+      background: var(--card);
+      border-radius: 22px 22px 0 0;
+      border-top: 1px solid var(--gold-border);
+      padding: 20px 20px 48px;
+      width: 100%; max-width: 480px;
+      animation: slide-up .28s ease;
+    }
+    @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .drag-handle {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.18); margin: 0 auto 20px;
+    }
+    .sheet-day  { font-family: 'Bebas Neue', sans-serif; font-size: 52px; color: var(--gold); line-height: 1; }
+    .sheet-date { font-size: 12px; color: var(--muted); margin-bottom: 22px; }
+
+    /* ===== STATS ===== */
+    .stats-hero {
+      background: linear-gradient(160deg, var(--card) 0%, #16203a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 32px 20px; text-align: center;
+    }
+    .badge-ring {
+      width: 86px; height: 86px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), #b45309);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 42px; line-height: 1;
+      box-shadow: 0 0 0 4px rgba(245,158,11,0.2), 0 0 32px rgba(245,158,11,0.3);
+      animation: glow 2.5s ease-in-out infinite;
+    }
+    @keyframes glow {
+      0%,100% { box-shadow: 0 0 0 4px rgba(245,158,11,0.2), 0 0 24px rgba(245,158,11,0.25); }
+      50%      { box-shadow: 0 0 0 6px rgba(245,158,11,0.25), 0 0 44px rgba(245,158,11,0.45); }
+    }
+    .stats-uname { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .stats-sub   { font-size: 13px; color: var(--muted); }
+
+    .sg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 20px 16px 0; }
+    .sc { padding: 18px 14px; text-align: center; }
+    .sc.full { grid-column: span 2; }
+    .sv { font-family: 'Bebas Neue', sans-serif; font-size: 50px; color: var(--gold); line-height: 1; }
+    .sl { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 3px; }
+
+    .bar-sec { padding: 20px 16px 8px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+    .bar-lbl { font-size: 12px; color: var(--muted); width: 56px; flex-shrink: 0; }
+    .bar-track { flex: 1; height: 9px; background: rgba(255,255,255,0.07); border-radius: 100px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 100px; transition: width .8s ease; }
+    .bf-v  { background: #3b82f6; }
+    .bf-w  { background: #8b5cf6; }
+    .bf-a  { background: var(--success); }
+    .bar-pct { font-size: 12px; font-weight: 700; color: var(--gold); width: 34px; text-align: right; }
+
+    .trophy-card {
+      margin: 16px;
+      padding: 24px 20px; text-align: center;
+      background: linear-gradient(135deg, var(--gold-dim), rgba(245,158,11,0.06));
+      border: 1px solid var(--gold-border); border-radius: var(--r);
+    }
+    .trophy-ic  { font-size: 48px; margin-bottom: 10px; }
+    .trophy-ttl { font-size: 17px; font-weight: 700; color: var(--gold); margin-bottom: 6px; }
+    .trophy-txt { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* ===== ADMIN ===== */
+    .admin-hero {
+      background: linear-gradient(160deg, var(--card) 0%, #15202e 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 18px 16px;
+    }
+    .tag {
+      display: inline-block;
+      background: var(--gold-dim); border: 1px solid var(--gold-border);
+      color: var(--gold); border-radius: 5px;
+      padding: 3px 9px; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .admin-title { font-size: 19px; font-weight: 700; }
+
+    .asg { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 14px 16px; }
+    .asc { padding: 14px 10px; text-align: center; }
+    .asv { font-family: 'Bebas Neue', sans-serif; font-size: 34px; color: var(--gold); line-height: 1; }
+    .asl { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 7px; padding: 6px 16px 12px; overflow-x: auto; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 100px; padding: 8px 16px;
+      font-size: 12px; font-weight: 500;
+      font-family: 'Noto Sans KR', sans-serif;
+      cursor: pointer; white-space: nowrap; transition: all .18s;
+    }
+    .tab-btn.active {
+      background: var(--gold); border-color: var(--gold);
+      color: var(--navy); font-weight: 700;
+    }
+
+    /* Participant rows */
+    .p-row {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 13px 15px; margin-bottom: 8px;
+    }
+    .p-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .p-name { font-size: 14px; font-weight: 700; }
+    .p-rate { font-size: 13px; font-weight: 700; color: var(--gold); }
+    .p-dots { display: flex; gap: 3px; flex-wrap: wrap; }
+    .dot {
+      width: 17px; height: 17px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px;
+    }
+    .dot-ok    { background: rgba(16,185,129,0.25); color: var(--success); }
+    .dot-part  { background: rgba(245,158,11,0.2); color: var(--gold); }
+    .dot-miss  { background: rgba(255,255,255,0.06); color: var(--muted); }
+    .dot-lock  { background: rgba(71,85,105,0.15); color: #3d4f63; }
+
+    /* Overview table */
+    .tbl-wrap { overflow-x: auto; padding: 0 16px 20px; }
+    .ov-tbl { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 560px; }
+    .ov-tbl th {
+      background: rgba(255,255,255,0.04); color: var(--muted);
+      padding: 8px 5px; text-align: center;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600; white-space: nowrap;
+    }
+    .ov-tbl th:first-child { text-align: left; padding-left: 8px; }
+    .ov-tbl td { padding: 7px 5px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .ov-tbl td:first-child { text-align: left; padding-left: 8px; font-weight: 600; white-space: nowrap; }
+    .ov-tbl tr:hover td { background: rgba(255,255,255,0.02); }
+    .ov-tbl .rate-cell { font-weight: 700; color: var(--gold); }
+
+    /* Create form */
+    .create-wrap { padding: 16px; }
+    .create-card { padding: 20px 18px; }
+    .create-title { font-size: 15px; font-weight: 700; color: var(--gold); margin-bottom: 16px; }
+    .notice {
+      margin-top: 12px; padding: 13px 14px;
+      background: var(--gold-dim); border: 1px solid var(--gold-border);
+      border-radius: 10px;
+    }
+    .notice p { font-size: 12px; color: var(--muted); line-height: 1.75; }
+    .notice strong { color: var(--gold-light); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b; border: 1px solid var(--border);
+      color: var(--text); border-radius: 12px;
+      padding: 13px 20px; font-size: 14px; font-weight: 500;
+      z-index: 999; transition: transform .3s ease;
+      white-space: nowrap; box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .toast.show  { transform: translateX(-50%) translateY(0); }
+    .toast.ok    { border-color: rgba(16,185,129,0.45); }
+    .toast.fail  { border-color: rgba(239,68,68,0.45); }
+
+    /* Helpers */
+    .mt8  { margin-top: 8px; }
+    .mt12 { margin-top: 12px; }
+    .mt16 { margin-top: 16px; }
+    .mt20 { margin-top: 20px; }
+    .p16  { padding: 16px; }
+    .p20  { padding: 0 16px 20px; }
+    .w100 { width: 100%; }
+    .flex-row { display: flex; gap: 8px; align-items: center; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .text-center { text-align: center; }
+    .text-muted  { color: var(--muted); font-size: 13px; }
+    .empty { padding: 32px 20px; text-align: center; color: var(--muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<div id="app"><div class="spinner-wrap"><div class="spinner"></div><p class="spinner-label">잠시만요...</p></div></div>
+<div class="toast" id="toast"></div>
+<div id="modal-root"></div>
+
+<script>
+/* =====================================================
+   ⚙️  SUPABASE 설정 — 아래 두 값을 채워주세요
+   Supabase 대시보드 → Project Settings → API 에서 확인
+   ===================================================== */
+const SUPA_URL  = 'YOUR_SUPABASE_URL';
+const SUPA_ANON = 'YOUR_SUPABASE_ANON_KEY';
+/* ===================================================== */
+
+// db는 init()에서 안전하게 초기화
+let db = null;
+
+/* ──────── STATE ──────── */
+let S = {
+  user: null,
+  profile: null,
+  checks: [],        // [{day, video_done, writing_done, action_done}]
+  view: 'loading',   // login | home | stats | admin
+  adminTab: 'dash',  // dash | stat | create
+  participants: [],
+  allChecks: [],
+};
+
+/* ──────── UTILS ──────── */
+const $ = id => document.getElementById(id);
+const app = () => $('app');
+
+function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function fmtDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${d.getMonth()+1}월 ${d.getDate()}일`;
+}
+
+function daysBetween(start, end) {
+  const s = new Date(start + 'T00:00:00');
+  const e = new Date(end   + 'T00:00:00');
+  return Math.floor((e - s) / 86400000);
+}
+
+function maxUnlocked(startDate) {
+  if (!startDate) return 0;
+  const diff = daysBetween(startDate, today());
+  if (diff < 0) return 0;
+  return Math.min(diff + 1, 14);
+}
+
+function getCheck(day) {
+  return S.checks.find(c => c.day === day) || { video_done: false, writing_done: false, action_done: false };
+}
+
+function allDone(c) { return c.video_done && c.writing_done && c.action_done; }
+
+function shareText(day, c) {
+  const v = c.video_done ? '✅' : '⬜';
+  const w = c.writing_done ? '✅' : '⬜';
+  const a = c.action_done  ? '✅' : '⬜';
+  const fire = allDone(c) ? ' 🔥' : '';
+  return `알파경제맘 프로젝트 Day${day} ${allDone(c)?'완료!':'진행중'}\n영상${v} 필사${w} 행동${a}${fire}`;
+}
+
+async function copyText(txt) {
+  try {
+    await navigator.clipboard.writeText(txt);
+    toast('📋 복사했어요!', 'ok');
+  } catch { toast('복사 실패 — 수동 복사해주세요', 'fail'); }
+}
+
+function toast(msg, type='') {
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = `toast show ${type}`;
+  clearTimeout(window._toastTm);
+  window._toastTm = setTimeout(() => { el.className = 'toast'; }, 2600);
+}
+
+function computeStats(checks) {
+  let totalDone=0, vDone=0, wDone=0, aDone=0;
+  let streak=0, maxStreak=0;
+  for (let d=1; d<=14; d++) {
+    const c = checks.find(x=>x.day===d) || {};
+    const full = c.video_done && c.writing_done && c.action_done;
+    if (full) { totalDone++; streak++; maxStreak=Math.max(maxStreak,streak); } else { streak=0; }
+    if (c.video_done)   vDone++;
+    if (c.writing_done) wDone++;
+    if (c.action_done)  aDone++;
+  }
+  return {
+    totalDone,
+    totalRate: Math.round(totalDone/14*100),
+    vRate: Math.round(vDone/14*100),
+    wRate: Math.round(wDone/14*100),
+    aRate: Math.round(aDone/14*100),
+    maxStreak
+  };
+}
+
+/* ──────── DB CALLS ──────── */
+async function loadProfile() {
+  const { data } = await db.from('profiles').select('*').eq('id', S.user.id).single();
+  S.profile = data;
+}
+
+async function loadMyChecks() {
+  const { data } = await db.from('daily_checks').select('*').eq('user_id', S.user.id);
+  S.checks = data || [];
+}
+
+async function upsertCheck(day, video, writing, action) {
+  const { error } = await db.from('daily_checks').upsert({
+    user_id: S.user.id, day,
+    video_done: video, writing_done: writing, action_done: action,
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'user_id,day' });
+  if (error) throw error;
+  await loadMyChecks();
+}
+
+async function loadAdminData() {
+  const [{ data: pData }, { data: cData }] = await Promise.all([
+    db.from('profiles').select('*').eq('role','participant').order('created_at'),
+    db.from('daily_checks').select('*')
+  ]);
+  S.participants = pData || [];
+  S.allChecks    = cData || [];
+}
+
+async function createUser(name, email, pw, startDate) {
+  // Save admin session
+  const { data: sess } = await db.auth.getSession();
+  const adminSess = sess.session;
+
+  // Create new user (changes active session)
+  const { data: newU, error } = await db.auth.signUp({
+    email, password: pw,
+    options: { data: { name, role: 'participant' } }
+  });
+  if (error) throw error;
+
+  // Restore admin session immediately
+  await db.auth.setSession({
+    access_token:  adminSess.access_token,
+    refresh_token: adminSess.refresh_token
+  });
+
+  // Update profile start_date (trigger auto-creates profile row)
+  if (newU.user) {
+    await new Promise(r => setTimeout(r, 800));
+    await db.from('profiles')
+      .update({ start_date: startDate, name })
+      .eq('id', newU.user.id);
+  }
+}
+
+function exportCSV() {
+  const rows = [['이름','이메일','Day','영상','필사','행동','전체완료']];
+  S.participants.forEach(p => {
+    for (let d=1; d<=14; d++) {
+      const c = S.allChecks.find(x => x.user_id===p.id && x.day===d);
+      rows.push([
+        p.name, p.email, d,
+        c?.video_done   ? 'O' : '',
+        c?.writing_done ? 'O' : '',
+        c?.action_done  ? 'O' : '',
+        (c?.video_done && c?.writing_done && c?.action_done) ? 'O' : ''
+      ]);
+    }
+  });
+  const csv = '\uFEFF' + rows.map(r => r.join(',')).join('\r\n');
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })),
+    download: `알파경제맘_${today()}.csv`
+  });
+  a.click();
+}
+
+/* ──────── AUTH ──────── */
+async function doLogin() {
+  const email = $('li-email').value.trim();
+  const pw    = $('li-pw').value;
+  const errEl = $('li-err');
+  errEl.textContent = '';
+  if (!email || !pw) { errEl.textContent = '이메일과 비밀번호를 입력해주세요.'; return; }
+
+  const btn = $('li-btn');
+  btn.textContent = '로그인 중...'; btn.disabled = true;
+
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pw });
+  if (error) {
+    errEl.textContent = '로그인 실패: 이메일 또는 비밀번호를 확인해주세요.';
+    btn.textContent = '🔥 로그인 하기'; btn.disabled = false;
+    return;
+  }
+
+  S.user = data.user;
+  await loadProfile();
+  if (!S.profile) { errEl.textContent = '프로필을 찾을 수 없습니다.'; btn.disabled = false; return; }
+
+  if (S.profile.role === 'admin') {
+    await renderAdmin();
+  } else {
+    await loadMyChecks();
+    // Auto-navigate to stats if all 14 done for the first time
+    const st = computeStats(S.checks);
+    const alreadySeen = localStorage.getItem('stats-seen-' + S.user.id);
+    if (st.totalDone === 14 && !alreadySeen) {
+      localStorage.setItem('stats-seen-' + S.user.id, '1');
+      S.view = 'stats'; render();
+    } else {
+      S.view = 'home'; render();
+    }
+  }
+}
+
+async function doLogout() {
+  await db.auth.signOut();
+  S = { user:null, profile:null, checks:[], view:'login', adminTab:'dash', participants:[], allChecks:[] };
+  render();
+}
+
+/* ──────── NAVIGATION ──────── */
+function go(view) { S.view = view; render(); }
+
+function render() {
+  switch (S.view) {
+    case 'loading': app().innerHTML = `<div class="spinner-wrap"><div class="spinner"></div></div>`; break;
+    case 'login':   renderLogin(); break;
+    case 'home':    renderHome(); break;
+    case 'stats':   renderStats(); break;
+    case 'admin':   renderAdmin(); break;
+  }
+}
+
+/* ──────── LOGIN ──────── */
+function renderLogin() {
+  app().innerHTML = `
+  <div id="v-login">
+    <div class="login-hero">
+      <div class="login-fire">🔥</div>
+      <div class="login-title">알파경제맘<br>프로젝트</div>
+      <div class="login-tagline">14일 챌린지 · 매일 한 걸음씩 성장</div>
+    </div>
+    <div class="card login-box">
+      <div class="form-group">
+        <label class="form-label">이메일</label>
+        <input class="form-input" id="li-email" type="email" placeholder="example@email.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">비밀번호</label>
+        <input class="form-input" id="li-pw" type="password" placeholder="비밀번호" autocomplete="current-password" />
+      </div>
+      <p class="err-msg" id="li-err"></p>
+      <button class="btn btn-gold mt8" id="li-btn" onclick="doLogin()">🔥 로그인 하기</button>
+    </div>
+  </div>`;
+  $('li-pw').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+}
+
+/* ──────── HOME ──────── */
+function renderHome() {
+  const sd  = S.profile.start_date || today();
+  const mu  = maxUnlocked(sd);
+  const td  = mu; // today is the max unlocked day
+  const done = S.checks.filter(c => allDone(c)).length;
+  const pct  = Math.round(done/14*100);
+  const tCheck = getCheck(td);
+  const st14   = computeStats(S.checks);
+
+  let gridHtml = '';
+  for (let d=1; d<=14; d++) {
+    const c = getCheck(d);
+    const locked = d > mu;
+    const isToday = d === td && !locked;
+    let cls='dc-locked', ic='🔒';
+    if (!locked) {
+      if (allDone(c))    { cls='dc-done';  ic='✅'; }
+      else if (isToday)  { cls='dc-today'; ic='🔥'; }
+      else               { cls='dc-open';  ic='⬜'; }
+    }
+    const click = locked ? '' : `onclick="openDay(${d})"`;
+    gridHtml += `<div class="dc ${cls}" ${click}><span class="dc-n">${d}</span><span class="dc-ic">${ic}</span></div>`;
+  }
+
+  const hasTodayAny = tCheck.video_done || tCheck.writing_done || tCheck.action_done;
+
+  app().innerHTML = `
+  <div class="hdr">
+    <div class="hdr-brand">
+      <div class="hdr-title">🔥 알파경제맘</div>
+      <div class="hdr-sub">14일 챌린지</div>
+    </div>
+    <div class="hdr-actions">
+      ${done >= 14 ? `<button class="btn-icon-gold" onclick="go('stats')">📊 내 통계</button>` : ''}
+      <button class="btn-ghost" onclick="doLogout()">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="home-hero">
+    <p class="greeting">안녕하세요 👋</p>
+    <p class="username">${S.profile.name}님</p>
+    <div class="prog-track"><div class="prog-bar" style="width:${pct}%"></div></div>
+    <div class="prog-meta"><span>${done} / 14일 완료</span><span class="prog-pct">${pct}%</span></div>
+  </div>
+
+  <div class="sec">
+    <div class="sec-title">진행 현황 &nbsp; ✅완료 ⬜진행 🔒잠김</div>
+    <div class="day-grid">${gridHtml}</div>
+  </div>
+
+  ${mu > 0 && mu <= 14 ? `
+  <div class="today-wrap">
+    <div class="card card-gold today-card" id="today-card">
+      <div class="today-hd">
+        <div class="today-label">Day ${td} · 오늘의 체크</div>
+        <div class="today-date">📅 ${fmtDate(today())}</div>
+      </div>
+      <div class="checks" id="today-checks">
+        ${ckHtml('video',   tCheck.video_done,   '📹', '영상 시청 소감 확인', 'home')}
+        ${ckHtml('writing', tCheck.writing_done, '✏️', '필사 완료', 'home')}
+        ${ckHtml('action',  tCheck.action_done,  '💪', '행동과제 실행', 'home')}
+      </div>
+      <button class="btn btn-gold mt12" id="save-btn" onclick="saveTodayHome()">💾 저장하기</button>
+      ${hasTodayAny ? `
+      <div class="share-row mt12">
+        <div class="share-txt" id="share-txt-home">${shareText(td, tCheck)}</div>
+        <button class="copy-btn" onclick="copyText(document.getElementById('share-txt-home').textContent)">카톡 복사</button>
+      </div>` : ''}
+    </div>
+  </div>` : ''}
+
+  <div class="pb32"></div>`;
+}
+
+function ckHtml(type, on, em, lbl, ctx) {
+  return `<div class="ck ${on?'ck-on':''}" onclick="toggleCk('${type}','${ctx}')">
+    <div class="ck-box">${on?'✓':''}</div>
+    <span class="ck-em">${em}</span>
+    <span class="ck-lbl">${lbl}</span>
+  </div>`;
+}
+
+// Temp state for home today
+let _hTemp = {};
+
+function initHomeTmp() {
+  const sd  = S.profile.start_date || today();
+  const mu  = maxUnlocked(sd);
+  const c   = getCheck(mu);
+  _hTemp = { video_done: c.video_done, writing_done: c.writing_done, action_done: c.action_done };
+}
+
+function toggleCk(type, ctx) {
+  const key = type + '_done';
+  if (ctx === 'home') {
+    // Update state.checks directly (optimistic)
+    const sd = S.profile.start_date || today();
+    const mu = maxUnlocked(sd);
+    let existing = S.checks.find(c => c.day === mu);
+    if (!existing) { existing = { day: mu, video_done:false, writing_done:false, action_done:false }; S.checks.push(existing); }
+    existing[key] = !existing[key];
+    renderHome();
+  } else {
+    // modal context
+    _mTemp[key] = !_mTemp[key];
+    openDay(_mDay);
+  }
+}
+
+async function saveTodayHome() {
+  const sd = S.profile.start_date || today();
+  const mu = maxUnlocked(sd);
+  const c  = getCheck(mu);
+  const btn = $('save-btn');
+  btn.textContent = '저장 중...'; btn.disabled = true;
+  try {
+    await upsertCheck(mu, c.video_done, c.writing_done, c.action_done);
+    toast('✅ 저장 완료!', 'ok');
+    // Check if all 14 done
+    const st = computeStats(S.checks);
+    if (st.totalDone === 14 && !localStorage.getItem('stats-seen-' + S.user.id)) {
+      localStorage.setItem('stats-seen-' + S.user.id, '1');
+      setTimeout(() => { S.view='stats'; render(); }, 600);
+    } else {
+      renderHome();
+    }
+  } catch(e) {
+    toast('저장 실패: ' + e.message, 'fail');
+    btn.textContent = '💾 저장하기'; btn.disabled = false;
+  }
+}
+
+/* ──────── DAY MODAL ──────── */
+let _mDay = 1;
+let _mTemp = {};
+
+function openDay(day) {
+  _mDay = day;
+  const c = getCheck(day);
+  _mTemp = { video_done: c.video_done, writing_done: c.writing_done, action_done: c.action_done };
+
+  const sd = S.profile.start_date || today();
+  const dayDate = new Date(sd + 'T00:00:00');
+  dayDate.setDate(dayDate.getDate() + day - 1);
+  const dateStr = fmtDate(dayDate.toISOString().split('T')[0]);
+  const hasTxt = _mTemp.video_done || _mTemp.writing_done || _mTemp.action_done;
+
+  $('modal-root').innerHTML = `
+  <div class="overlay" id="ov" onclick="maybeCloseModal(event)">
+    <div class="sheet">
+      <div class="drag-handle"></div>
+      <div class="sheet-day">DAY ${day}</div>
+      <div class="sheet-date">📅 ${dateStr}</div>
+      <div class="checks">
+        ${ckHtml('video',   _mTemp.video_done,   '📹', '영상 시청 소감 확인', 'modal')}
+        ${ckHtml('writing', _mTemp.writing_done, '✏️', '필사 완료', 'modal')}
+        ${ckHtml('action',  _mTemp.action_done,  '💪', '행동과제 실행', 'modal')}
+      </div>
+      <button class="btn btn-gold mt12" id="m-save-btn" onclick="saveModal()">💾 저장하기</button>
+      ${hasTxt ? `
+      <div class="share-row mt12">
+        <div class="share-txt" id="share-txt-modal">${shareText(day, _mTemp)}</div>
+        <button class="copy-btn" onclick="copyText(document.getElementById('share-txt-modal').textContent)">카톡 복사</button>
+      </div>` : ''}
+      <button class="btn btn-outline mt8" onclick="closeModal()">닫기</button>
+    </div>
+  </div>`;
+}
+
+function maybeCloseModal(e) { if (e.target === $('ov')) closeModal(); }
+function closeModal() { $('modal-root').innerHTML = ''; }
+
+async function saveModal() {
+  const btn = $('m-save-btn');
+  btn.textContent = '저장 중...'; btn.disabled = true;
+  try {
+    await upsertCheck(_mDay, _mTemp.video_done, _mTemp.writing_done, _mTemp.action_done);
+    closeModal();
+    toast('✅ 저장 완료!', 'ok');
+    const st = computeStats(S.checks);
+    if (st.totalDone === 14 && !localStorage.getItem('stats-seen-' + S.user.id)) {
+      localStorage.setItem('stats-seen-' + S.user.id, '1');
+      setTimeout(() => { S.view='stats'; render(); }, 500);
+    } else {
+      renderHome();
+    }
+  } catch(e) {
+    toast('저장 실패: ' + e.message, 'fail');
+    btn.textContent = '💾 저장하기'; btn.disabled = false;
+  }
+}
+
+/* ──────── STATS ──────── */
+function renderStats() {
+  const st = computeStats(S.checks);
+  const complete = st.totalDone === 14;
+
+  app().innerHTML = `
+  <div class="hdr">
+    <div class="hdr-brand">
+      <div class="hdr-title">📊 내 통계</div>
+      <div class="hdr-sub">알파경제맘 프로젝트</div>
+    </div>
+    <div class="hdr-actions">
+      <button class="btn-icon-gold" onclick="go('home')">← 홈</button>
+      <button class="btn-ghost" onclick="doLogout()">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="stats-hero">
+    <div class="badge-ring">${complete ? '🏆' : '🔥'}</div>
+    <div class="stats-uname">${S.profile.name}님</div>
+    <div class="stats-sub">${complete ? '🎉 14일 챌린지 수료를 축하합니다!' : `${st.totalDone}일 완료 · 계속 화이팅!`}</div>
+  </div>
+
+  <div class="sg">
+    <div class="card sc full">
+      <div class="sv">${st.totalRate}<span style="font-size:28px">%</span></div>
+      <div class="sl">전체 완료율 · ${st.totalDone} / 14일</div>
+    </div>
+    <div class="card sc">
+      <div class="sv">${st.maxStreak}</div>
+      <div class="sl">🔥 최장 연속 달성 (일)</div>
+    </div>
+    <div class="card sc">
+      <div class="sv">${st.totalDone}</div>
+      <div class="sl">✅ 완료한 날 수</div>
+    </div>
+  </div>
+
+  <div class="bar-sec">
+    <div class="sec-title">과제별 완료율</div>
+    <div class="bar-row">
+      <div class="bar-lbl">📹 영상</div>
+      <div class="bar-track"><div class="bar-fill bf-v" style="width:${st.vRate}%"></div></div>
+      <div class="bar-pct">${st.vRate}%</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-lbl">✏️ 필사</div>
+      <div class="bar-track"><div class="bar-fill bf-w" style="width:${st.wRate}%"></div></div>
+      <div class="bar-pct">${st.wRate}%</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-lbl">💪 행동</div>
+      <div class="bar-track"><div class="bar-fill bf-a" style="width:${st.aRate}%"></div></div>
+      <div class="bar-pct">${st.aRate}%</div>
+    </div>
+  </div>
+
+  ${complete ? `
+  <div class="trophy-card">
+    <div class="trophy-ic">🏆</div>
+    <div class="trophy-ttl">수료 배지 획득!</div>
+    <div class="trophy-txt">알파경제맘 14일 챌린지를<br>성공적으로 완료하셨습니다.<br>대단해요! 🎊</div>
+  </div>` : ''}
+
+  <div class="pb32"></div>`;
+}
+
+/* ──────── ADMIN ──────── */
+async function renderAdmin() {
+  app().innerHTML = `<div class="spinner-wrap"><div class="spinner"></div></div>`;
+  await loadAdminData();
+  S.view = 'admin';
+
+  const totalP     = S.participants.length;
+  const allDoneList = S.allChecks.filter(c => c.video_done && c.writing_done && c.action_done);
+  const totalPoss  = S.participants.reduce((acc, p) => {
+    if (!p.start_date) return acc;
+    return acc + Math.min(daysBetween(p.start_date, today()) + 1, 14);
+  }, 0);
+  const overallRate = totalPoss > 0 ? Math.round(allDoneList.length / totalPoss * 100) : 0;
+
+  // Count today's completions
+  const todayComplete = S.participants.filter(p => {
+    if (!p.start_date) return false;
+    const dayN = daysBetween(p.start_date, today()) + 1;
+    if (dayN < 1 || dayN > 14) return false;
+    const c = S.allChecks.find(x => x.user_id === p.id && x.day === dayN);
+    return c && allDone(c);
+  }).length;
+
+  app().innerHTML = `
+  <div class="hdr">
+    <div class="hdr-brand">
+      <div class="hdr-title">⚙️ 관리자</div>
+      <div class="hdr-sub">알파경제맘 프로젝트</div>
+    </div>
+    <div class="hdr-actions">
+      <button class="btn-ghost" onclick="doLogout()">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="admin-hero">
+    <div class="tag">ADMIN</div>
+    <div class="admin-title">📊 전체 현황판</div>
+  </div>
+
+  <div class="asg">
+    <div class="card asc"><div class="asv">${totalP}</div><div class="asl">총 참여자</div></div>
+    <div class="card asc"><div class="asv">${todayComplete}</div><div class="asl">오늘 완료</div></div>
+    <div class="card asc"><div class="asv">${overallRate}%</div><div class="asl">전체 달성률</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn ${S.adminTab==='dash'?'active':''}" onclick="switchTab('dash')">참여자 현황</button>
+    <button class="tab-btn ${S.adminTab==='stat'?'active':''}" onclick="switchTab('stat')">통계</button>
+    <button class="tab-btn ${S.adminTab==='create'?'active':''}" onclick="switchTab('create')">참여자 추가</button>
+  </div>
+
+  <div id="tab-body"></div>
+  <div class="pb32"></div>`;
+
+  switchTab(S.adminTab);
+}
+
+function switchTab(tab) {
+  S.adminTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['dash','stat','create'][i] === tab);
+  });
+  const body = $('tab-body');
+  if (tab === 'dash')   body.innerHTML = tabDash();
+  if (tab === 'stat')   body.innerHTML = tabStat();
+  if (tab === 'create') body.innerHTML = tabCreate();
+}
+
+function tabDash() {
+  if (S.participants.length === 0) return `<div class="empty">아직 참여자가 없습니다</div>`;
+
+  // Participant card rows
+  let pRows = S.participants.map(p => {
+    const mu   = maxUnlocked(p.start_date);
+    const done = S.allChecks.filter(c => c.user_id===p.id && allDone(c)).length;
+    const rate = mu > 0 ? Math.round(done / Math.min(mu,14) * 100) : 0;
+    let dots = '';
+    for (let d=1; d<=14; d++) {
+      const c = S.allChecks.find(x => x.user_id===p.id && x.day===d);
+      const locked = d > mu;
+      let dc='dot-lock', ic='🔒';
+      if (!locked) {
+        if (c && allDone(c))   { dc='dot-ok';   ic='✅'; }
+        else if (c && (c.video_done||c.writing_done||c.action_done)) { dc='dot-part'; ic='🔶'; }
+        else                    { dc='dot-miss';  ic='　'; }
+      }
+      dots += `<div class="dot ${dc}" title="Day ${d}">${dc==='dot-miss'||dc==='dot-lock'?'':ic.includes('🔒')?'🔒':''}</div>`;
+    }
+    return `<div class="p-row">
+      <div class="p-top"><span class="p-name">${p.name}</span><span class="p-rate">${done}/14 (${rate}%)</span></div>
+      <div class="p-dots">${dots}</div>
+    </div>`;
+  }).join('');
+
+  // Overview table
+  let tRows = S.participants.map(p => {
+    const mu = maxUnlocked(p.start_date);
+    const cells = Array.from({length:14},(_,i)=>i+1).map(d => {
+      const c = S.allChecks.find(x => x.user_id===p.id && x.day===d);
+      const locked = d > mu;
+      if (locked)       return `<td>🔒</td>`;
+      if (!c)           return `<td style="color:var(--muted)">-</td>`;
+      if (allDone(c))   return `<td>✅</td>`;
+      return `<td>🔶</td>`;
+    }).join('');
+    const done = S.allChecks.filter(c=>c.user_id===p.id && allDone(c)).length;
+    return `<tr><td>${p.name}</td>${cells}<td class="rate-cell">${done}/14</td></tr>`;
+  }).join('');
+
+  return `
+  <div class="p20">
+    <div class="sec-title" style="margin-bottom:12px">참여자별 달성 현황</div>
+    ${pRows}
+  </div>
+
+  <div class="tbl-wrap">
+    <div class="sec-title" style="margin-bottom:10px">전체 현황표 (✅완료 🔶일부 🔒잠김)</div>
+    <table class="ov-tbl">
+      <thead><tr>
+        <th>이름</th>
+        ${Array.from({length:14},(_,i)=>`<th>D${i+1}</th>`).join('')}
+        <th>합계</th>
+      </tr></thead>
+      <tbody>${tRows}</tbody>
+    </table>
+  </div>
+
+  <div class="p16">
+    <button class="btn btn-outline" onclick="exportCSV()">📥 CSV 전체 다운로드</button>
+  </div>`;
+}
+
+function tabStat() {
+  const totalP = S.participants.length || 1;
+  const vTotal = S.allChecks.filter(c=>c.video_done).length;
+  const wTotal = S.allChecks.filter(c=>c.writing_done).length;
+  const aTotal = S.allChecks.filter(c=>c.action_done).length;
+  const base   = totalP * 14;
+
+  const dailyRows = Array.from({length:14},(_,i)=>i+1).map(d => {
+    const done = S.allChecks.filter(c => c.day===d && allDone(c)).length;
+    const rate = Math.round(done/totalP*100);
+    return `<div class="bar-row">
+      <div class="bar-lbl">Day ${d}</div>
+      <div class="bar-track"><div class="bar-fill bf-a" style="width:${rate}%"></div></div>
+      <div class="bar-pct">${rate}%</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="p16">
+    <div class="sec-title">과제별 완료율</div>
+    <div class="bar-row">
+      <div class="bar-lbl">📹 영상</div>
+      <div class="bar-track"><div class="bar-fill bf-v" style="width:${Math.round(vTotal/base*100)}%"></div></div>
+      <div class="bar-pct">${Math.round(vTotal/base*100)}%</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-lbl">✏️ 필사</div>
+      <div class="bar-track"><div class="bar-fill bf-w" style="width:${Math.round(wTotal/base*100)}%"></div></div>
+      <div class="bar-pct">${Math.round(wTotal/base*100)}%</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-lbl">💪 행동</div>
+      <div class="bar-track"><div class="bar-fill bf-a" style="width:${Math.round(aTotal/base*100)}%"></div></div>
+      <div class="bar-pct">${Math.round(aTotal/base*100)}%</div>
+    </div>
+    <div class="sec-title mt20">일자별 참여율 (전체완료 기준)</div>
+    ${dailyRows}
+  </div>`;
+}
+
+function tabCreate() {
+  return `
+  <div class="create-wrap">
+    <div class="card create-card">
+      <div class="create-title">➕ 참여자 계정 생성</div>
+      <div class="form-group">
+        <label class="form-label">이름</label>
+        <input class="form-input" id="cn-name" type="text" placeholder="홍길동" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">이메일</label>
+        <input class="form-input" id="cn-email" type="email" placeholder="user@example.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">비밀번호 (6자 이상)</label>
+        <input class="form-input" id="cn-pw" type="password" placeholder="초기 비밀번호" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">챌린지 시작일</label>
+        <input class="form-input" id="cn-start" type="date" value="${today()}" />
+      </div>
+      <p class="err-msg" id="cn-err"></p>
+      <button class="btn btn-gold" id="cn-btn" onclick="doCreateUser()">계정 생성</button>
+    </div>
+    <div class="notice">
+      <p>💡 <strong>필수 설정:</strong> Supabase 대시보드 → Authentication → Providers → Email 에서<br>
+      <strong>"Confirm email"을 OFF</strong>로 설정해야 즉시 계정이 활성화됩니다.</p>
+    </div>
+  </div>`;
+}
+
+async function doCreateUser() {
+  const name  = $('cn-name').value.trim();
+  const email = $('cn-email').value.trim();
+  const pw    = $('cn-pw').value;
+  const start = $('cn-start').value;
+  const err   = $('cn-err');
+  err.textContent = '';
+
+  if (!name||!email||!pw||!start) { err.textContent = '모든 항목을 입력해주세요.'; return; }
+  if (pw.length < 6) { err.textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
+
+  const btn = $('cn-btn');
+  btn.textContent = '생성 중...'; btn.disabled = true;
+  try {
+    await createUser(name, email, pw, start);
+    toast(`✅ ${name}님 계정 생성 완료!`, 'ok');
+    $('cn-name').value = ''; $('cn-email').value = ''; $('cn-pw').value = '';
+    await renderAdmin();
+    switchTab('dash');
+  } catch(e) {
+    err.textContent = '오류: ' + e.message;
+    btn.textContent = '계정 생성'; btn.disabled = false;
+  }
+}
+
+/* ──────── CDN 로드 실패 안내 ──────── */
+function renderCdnError() {
+  app().innerHTML = `
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:20px;text-align:center;">
+    <div style="font-size:52px">⚠️</div>
+    <div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--gold);margin-bottom:8px">라이브러리 로드 실패</div>
+      <div style="font-size:13px;color:var(--muted);line-height:2;">
+        이 앱은 <strong style="color:var(--text)">인터넷이 연결된 환경</strong>에서<br>
+        <strong style="color:var(--text)">GitHub Pages (https://)</strong> 로 열어야 해요.<br><br>
+        <span style="color:#f87171">⛔ file:// 로컬 실행은 지원되지 않아요</span>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;max-width:380px;width:100%;">
+      <div style="font-size:12px;color:var(--muted);line-height:2.2;text-align:left;">
+        <div>① index.html을 GitHub 저장소에 push</div>
+        <div>② Settings → Pages → main 브랜치 선택</div>
+        <div>③ 발급된 <code style="color:var(--gold)">https://</code> 주소로 접속</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ──────── SETUP GUIDE (Supabase 미설정 시) ──────── */
+function renderSetupGuide() {
+  app().innerHTML = `
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;gap:24px;">
+    <div style="font-size:52px">⚙️</div>
+    <div style="text-align:center">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);letter-spacing:1px;margin-bottom:8px">Supabase 설정 필요</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.8">index.html 파일을 열어<br>아래 두 줄에 Supabase 정보를 입력해주세요</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--gold-border);border-radius:14px;padding:20px 18px;width:100%;max-width:400px;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-weight:600;letter-spacing:0.5px">📄 index.html 상단 수정</div>
+      <div style="background:#0c1220;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;line-height:2;color:#e2e8f0;word-break:break-all;">
+        <span style="color:#94a3b8">const</span> SUPA_URL  = <span style="color:#fde68a">'https://xxxx.supabase.co'</span>;<br>
+        <span style="color:#94a3b8">const</span> SUPA_ANON = <span style="color:#fde68a">'eyJhbGci...'</span>;
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;width:100%;max-width:400px;">
+      <div style="font-size:13px;font-weight:600;margin-bottom:12px;">📋 세팅 순서</div>
+      <div style="font-size:12px;color:var(--muted);line-height:2.2;">
+        <div>① <a href="https://supabase.com" target="_blank" style="color:var(--gold)">supabase.com</a> → 새 프로젝트 생성</div>
+        <div>② Project Settings → API → URL & anon key 복사</div>
+        <div>③ Authentication → Email → Confirm email <strong style="color:#f87171">OFF</strong></div>
+        <div>④ SQL Editor → supabase_setup.sql 실행</div>
+        <div>⑤ index.html 상단 두 줄 수정 후 GitHub Pages 배포</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:center">README.md 파일에 전체 가이드가 있어요</div>
+  </div>`;
+}
+
+/* ──────── INIT ──────── */
+async function init() {
+  // ① CDN 로드 실패 체크
+  if (window.__supabaseLoadFailed || !window.supabase) {
+    renderCdnError();
+    return;
+  }
+
+  // ② Supabase 클라이언트 초기화
+  try {
+    const { createClient } = window.supabase;
+    db = createClient(SUPA_URL, SUPA_ANON);
+  } catch(e) {
+    renderCdnError();
+    return;
+  }
+
+  // ③ Supabase URL 설정 여부 확인
+  if (!SUPA_URL || SUPA_URL.startsWith('YOUR') || !SUPA_ANON || SUPA_ANON.startsWith('YOUR')) {
+    renderSetupGuide();
+    return;
+  }
+
+  // ④ 5초 타임아웃 — 네트워크 문제로 getSession이 멈추는 경우 대비
+  const withTimeout = (promise, ms) =>
+    Promise.race([promise, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+
+  try {
+    const { data: { session } } = await withTimeout(db.auth.getSession(), 5000);
+    if (session) {
+      S.user = session.user;
+      await loadProfile();
+      if (S.profile?.role === 'admin') {
+        await renderAdmin();
+      } else if (S.profile) {
+        await loadMyChecks();
+        const st = computeStats(S.checks);
+        if (st.totalDone === 14 && !localStorage.getItem('stats-seen-' + S.user.id)) {
+          localStorage.setItem('stats-seen-' + S.user.id, '1');
+          S.view = 'stats';
+        } else {
+          S.view = 'home';
+        }
+        render();
+      } else {
+        S.view = 'login'; render();
+      }
+    } else {
+      S.view = 'login'; render();
+    }
+  } catch(e) {
+    console.error('Init error:', e);
+    S.view = 'login'; render();
+  }
+
+  db.auth.onAuthStateChange(event => {
+    if (event === 'SIGNED_OUT') { S.view = 'login'; render(); }
+  });
+}
+
+init();
+</script>
+</body>
+</html>
