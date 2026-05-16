@@ -1100,9 +1100,9 @@ async function handleLogin() {
   if (MEMBERS[code]) {
     let displayName = MEMBERS[code];
     try {
-      const memberDoc = await db.collection('members').doc(code).get();
-      if (memberDoc.exists && memberDoc.data().customName) {
-        displayName = memberDoc.data().customName;
+      const profileDoc = await db.collection('plans').doc(`${code}_profile`).get();
+      if (profileDoc.exists && profileDoc.data().customName) {
+        displayName = profileDoc.data().customName;
       }
     } catch { /* 네트워크 오류 시 기본 이름 사용 */ }
     currentUser = { code, name: displayName, isAdmin: false };
@@ -1169,10 +1169,10 @@ async function saveCustomName() {
   if (!newName) { showToast('이름을 입력해주세요'); return; }
   showLoading(true);
   try {
-    await db.collection('members').doc(currentUser.code).set({
+    await db.collection('plans').doc(`${currentUser.code}_profile`).set({
       customName: newName,
       updatedAt: new Date().toISOString(),
-    });
+    }, { merge: true });
     currentUser.name = newName;
     document.getElementById('memberNameTag').textContent = `${newName} 님`;
     cancelEditName();
