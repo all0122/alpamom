@@ -205,7 +205,13 @@ window.addEventListener('load', function() {
   .logout-btn:active { background: var(--coral-pale); }
 
   .brand-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; color: var(--coral); text-transform: uppercase; margin-bottom: 4px; }
-  .member-name-tag { font-size: 12px; color: var(--sage); font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em; }
+  .member-name-tag { font-size: 12px; color: var(--sage); font-weight: 700; margin-bottom: 2px; letter-spacing: 0.05em; cursor: pointer; }
+  .member-name-tag::after { content: ' ✎'; font-size: 10px; opacity: 0.6; }
+  .name-edit-area { display: none; align-items: center; justify-content: center; gap: 5px; margin-bottom: 6px; }
+  .name-edit-area.active { display: flex; }
+  .name-edit-input { font-size: 12px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--sage); background: var(--paper); color: var(--ink); width: 90px; outline: none; }
+  .name-edit-save { font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--sage); color: #fff; border: none; cursor: pointer; font-weight: 600; }
+  .name-edit-cancel { font-size: 11px; padding: 3px 6px; border-radius: 6px; background: transparent; color: var(--ink-light); border: 1px solid var(--ink-light); cursor: pointer; }
   .main-title {
     font-family: 'Nanum Myeongjo', serif; font-size: 24px; font-weight: 800;
     color: var(--ink); letter-spacing: -0.01em; line-height: 1.3; margin-bottom: 12px;
@@ -748,7 +754,12 @@ window.addEventListener('load', function() {
     <div class="header">
       <button class="logout-btn" onclick="handleLogout()">나가기</button>
       <div class="brand-tag">NEW RICH 뉴리치연구소</div>
-      <div class="member-name-tag" id="memberNameTag"></div>
+      <div class="member-name-tag" id="memberNameTag" onclick="startEditName()"></div>
+      <div class="name-edit-area" id="nameEditArea">
+        <input type="text" class="name-edit-input" id="nameEditInput" maxlength="20" placeholder="이름 입력">
+        <button class="name-edit-save" onclick="saveCustomName()">저장</button>
+        <button class="name-edit-cancel" onclick="cancelEditName()">취소</button>
+      </div>
       <h1 class="main-title">엄마의 돈 공부<br>모닝플랜</h1>
       <div class="date-display">
         <span>✦</span>
@@ -1087,7 +1098,14 @@ async function handleLogin() {
   }
 
   if (MEMBERS[code]) {
-    currentUser = { code, name: MEMBERS[code], isAdmin: false };
+    let displayName = MEMBERS[code];
+    try {
+      const memberDoc = await db.collection('members').doc(code).get();
+      if (memberDoc.exists && memberDoc.data().customName) {
+        displayName = memberDoc.data().customName;
+      }
+    } catch { /* 네트워크 오류 시 기본 이름 사용 */ }
+    currentUser = { code, name: displayName, isAdmin: false };
     await initMemberScreen();
     showScreen('screen-member');
     return;
@@ -1130,6 +1148,45 @@ async function initMemberScreen() {
 
 document.getElementById('planDate').addEventListener('change', async function () {
   await loadPlanFromDB(this.value);
+});
+
+// ─── 이름 편집 ───
+function startEditName() {
+  document.getElementById('nameEditInput').value = currentUser.name;
+  document.getElementById('memberNameTag').style.display = 'none';
+  document.getElementById('nameEditArea').classList.add('active');
+  document.getElementById('nameEditInput').focus();
+  document.getElementById('nameEditInput').select();
+}
+
+function cancelEditName() {
+  document.getElementById('memberNameTag').style.display = '';
+  document.getElementById('nameEditArea').classList.remove('active');
+}
+
+async function saveCustomName() {
+  const newName = document.getElementById('nameEditInput').value.trim();
+  if (!newName) { showToast('이름을 입력해주세요'); return; }
+  showLoading(true);
+  try {
+    await db.collection('members').doc(currentUser.code).set({
+      customName: newName,
+      updatedAt: new Date().toISOString(),
+    });
+    currentUser.name = newName;
+    document.getElementById('memberNameTag').textContent = `${newName} 님`;
+    cancelEditName();
+    showToast('✓ 이름이 변경되었습니다');
+  } catch {
+    showToast('저장 실패. 인터넷 연결을 확인해주세요.');
+  } finally {
+    showLoading(false);
+  }
+}
+
+document.getElementById('nameEditInput').addEventListener('keyup', e => {
+  if (e.key === 'Enter') saveCustomName();
+  if (e.key === 'Escape') cancelEditName();
 });
 
 async function loadPlanFromDB(date) {
