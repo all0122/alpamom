@@ -1279,17 +1279,12 @@ function handleLogout() {
 // ═══════════════════ MEMBER SCREEN ═══════════════════
 async function initMemberScreen() {
   document.getElementById('memberNameTag').textContent = `${currentUser.name} 님`;
-  const classDates = getClassDates();
-  const lastDate   = classDates[classDates.length - 1];
-  const today      = todayKST();
-  const dateInput  = document.getElementById('planDate');
+  const today     = todayKST();
+  const dateInput = document.getElementById('planDate');
 
-  dateInput.min = CLASS_START;
-  dateInput.max = lastDate;
-
-  const targetDate = today >= CLASS_START && today <= lastDate ? today
-    : today < CLASS_START ? CLASS_START : lastDate;
-  dateInput.value = targetDate;
+  dateInput.min = '';
+  dateInput.max = today;
+  dateInput.value = today;
 
   memberSwitchTab('write');
   await loadPlanFromDB(targetDate);
