@@ -590,32 +590,21 @@ window.addEventListener('load', function() {
   .admin-page.active { display: block; }
 
   /* ══ 회원 관리 ══ */
-  .mmgmt-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 12px; }
+  .mmgmt-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 10px; }
   .mmgmt-count { font-size: 13px; color: var(--ink-mid); font-weight: 600; }
-  .mmgmt-add-btn { padding: 9px 16px; background: var(--sage); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+  .mmgmt-add-btn { padding: 9px 14px; background: var(--sage); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
   .mmgmt-add-btn:active { opacity: 0.8; }
-  .mmgmt-save-all-btn { padding: 9px 16px; background: var(--coral); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; animation: pulse-save 1.2s ease-in-out infinite; }
-  @keyframes pulse-save { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
-  .mmgmt-add-form { background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 16px; margin-bottom: 16px; }
-  .mmgmt-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-  .mmgmt-label { display: block; font-size: 11px; font-weight: 700; color: var(--ink-mid); letter-spacing: 0.05em; margin-bottom: 6px; }
-  .mmgmt-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'Noto Sans KR', sans-serif; color: var(--ink); background: var(--cream); outline: none; }
-  .mmgmt-input:focus { border-color: var(--sage); }
-  .mmgmt-code-row { display: flex; gap: 6px; }
-  .mmgmt-code-row .mmgmt-input { flex: 1; }
-  .mmgmt-gen-btn { padding: 0 10px; background: var(--sage-pale); color: var(--sage); border: 1px solid var(--sage-light); border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans KR', sans-serif; }
-  .mmgmt-form-actions { display: flex; gap: 8px; }
-  .mmgmt-save-btn { flex: 1; padding: 12px; background: var(--sage); color: white; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-  .mmgmt-cancel-btn { padding: 12px 18px; background: transparent; color: var(--ink-light); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-  .mmgmt-list { display: flex; flex-direction: column; gap: 8px; }
-  .mmgmt-row { display: flex; align-items: center; background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; gap: 12px; }
-  .mmgmt-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--sage-pale); color: var(--sage); font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .mmgmt-info { flex: 1; min-width: 0; }
-  .mmgmt-name { font-size: 14px; font-weight: 700; color: var(--ink); }
-  .mmgmt-code-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--sage); background: var(--sage-pale); border-radius: 4px; padding: 2px 6px; margin-top: 2px; }
-  .mmgmt-actions { display: flex; gap: 6px; flex-shrink: 0; }
-  .mmgmt-edit-btn { padding: 6px 10px; background: var(--cream); color: var(--ink-mid); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
-  .mmgmt-del-btn { padding: 6px 10px; background: var(--coral-pale); color: var(--coral); border: 1px solid var(--coral-light); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+  .mmgmt-save-all-btn { padding: 9px 14px; background: var(--coral); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+  .mmgmt-save-all-btn:active { opacity: 0.8; }
+  .mmgmt-col-header { display: grid; grid-template-columns: 1fr 1fr 36px; gap: 8px; padding: 0 4px 6px; }
+  .mmgmt-col-header span { font-size: 11px; font-weight: 700; color: var(--ink-light); letter-spacing: 0.05em; }
+  .mmgmt-list { display: flex; flex-direction: column; gap: 6px; }
+  .mmgmt-row { display: grid; grid-template-columns: 1fr 1fr 36px; gap: 8px; align-items: center; }
+  .mmgmt-row.new-row { background: var(--sage-pale); border-radius: var(--radius-sm); padding: 6px; margin: -2px -2px; }
+  .mmgmt-field { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'Noto Sans KR', sans-serif; color: var(--ink); background: var(--warm-white); outline: none; min-width: 0; }
+  .mmgmt-field:focus { border-color: var(--sage); background: white; }
+  .mmgmt-field.code-field { text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; font-size: 13px; }
+  .mmgmt-del-btn { width: 36px; height: 36px; background: var(--coral-pale); color: var(--coral); border: 1px solid var(--coral-light); border-radius: var(--radius-sm); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: 'Noto Sans KR', sans-serif; }
 
   /* ══ COMMENT PANEL ══ */
   .comment-panel-header {
@@ -1005,25 +994,14 @@ window.addEventListener('load', function() {
       <div class="mmgmt-topbar">
         <span class="mmgmt-count" id="mmgmtCount"></span>
         <div style="display:flex;gap:8px;">
-          <button class="mmgmt-save-all-btn" id="mmgmtSaveBtn" onclick="saveAllMembers()" style="display:none;">💾 저장하기</button>
-          <button class="mmgmt-add-btn" onclick="showAddMemberForm()">+ 회원 추가</button>
+          <button class="mmgmt-add-btn" onclick="addMemberRow()">+ 회원 추가</button>
+          <button class="mmgmt-save-all-btn" id="mmgmtSaveBtn" onclick="saveAllMembers()">💾 저장하기</button>
         </div>
       </div>
-      <div class="mmgmt-add-form" id="mmgmtAddForm" style="display:none;">
-        <div class="mmgmt-form-row">
-          <div class="mmgmt-form-field">
-            <label class="mmgmt-label">이름</label>
-            <input type="text" class="mmgmt-input" id="newMemberName" placeholder="홍길동" maxlength="20">
-          </div>
-          <div class="mmgmt-form-field">
-            <label class="mmgmt-label">로그인 코드</label>
-            <input type="text" class="mmgmt-input" id="newMemberCode" placeholder="예: HONG01" maxlength="12" style="text-transform:uppercase;">
-          </div>
-        </div>
-        <div class="mmgmt-form-actions">
-          <button class="mmgmt-save-btn" onclick="addMember()">추가하기</button>
-          <button class="mmgmt-cancel-btn" onclick="hideAddMemberForm()">취소</button>
-        </div>
+      <div class="mmgmt-col-header">
+        <span class="mmgmt-col-name">이름</span>
+        <span class="mmgmt-col-code">로그인 코드</span>
+        <span class="mmgmt-col-del"></span>
       </div>
       <div class="mmgmt-list" id="mmgmtList"></div>
     </div>
@@ -1594,95 +1572,76 @@ async function saveMembersToDB() {
   await db.collection('plans').doc('_members_index').set({ members: MEMBERS });
 }
 
-function generateCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code;
-  do {
-    code = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  } while (MEMBERS[code]);
-  document.getElementById('newMemberCode').value = code;
+function renderMemberMgmt() {
+  const entries = Object.entries(MEMBERS);
+  document.getElementById('mmgmtCount').textContent = `총 ${entries.length}명`;
+  document.getElementById('mmgmtList').innerHTML = entries.map(([code, name], idx) => `
+    <div class="mmgmt-row" data-idx="${idx}">
+      <input class="mmgmt-field" type="text" value="${name}"
+        placeholder="이름" maxlength="20"
+        data-original-code="${code}" data-field="name">
+      <input class="mmgmt-field code-field" type="text" value="${code}"
+        placeholder="코드" maxlength="12"
+        data-original-code="${code}" data-field="code">
+      <button class="mmgmt-del-btn" onclick="deleteRow(this)" title="삭제">✕</button>
+    </div>
+  `).join('');
 }
 
-function showAddMemberForm() {
-  document.getElementById('newMemberName').value = '';
-  document.getElementById('newMemberCode').value = '';
-  document.getElementById('mmgmtAddForm').style.display = 'block';
-  document.getElementById('newMemberName').focus();
+function addMemberRow() {
+  const list = document.getElementById('mmgmtList');
+  const row = document.createElement('div');
+  row.className = 'mmgmt-row new-row';
+  row.innerHTML = `
+    <input class="mmgmt-field" type="text" placeholder="이름" maxlength="20" data-original-code="" data-field="name">
+    <input class="mmgmt-field code-field" type="text" placeholder="코드 (예: HONG01)" maxlength="12" data-original-code="" data-field="code">
+    <button class="mmgmt-del-btn" onclick="deleteRow(this)" title="삭제">✕</button>
+  `;
+  list.appendChild(row);
+  row.querySelector('[data-field="name"]').focus();
+  // count 업데이트
+  const cur = parseInt(document.getElementById('mmgmtCount').textContent) || 0;
+  document.getElementById('mmgmtCount').textContent = `총 ${cur + 1}명`;
 }
 
-function hideAddMemberForm() {
-  document.getElementById('mmgmtAddForm').style.display = 'none';
-}
-
-let membersChanged = false;
-
-function markMembersChanged() {
-  membersChanged = true;
-  document.getElementById('mmgmtSaveBtn').style.display = 'block';
+function deleteRow(btn) {
+  const row = btn.closest('.mmgmt-row');
+  row.remove();
+  const cur = parseInt(document.getElementById('mmgmtCount').textContent) || 0;
+  document.getElementById('mmgmtCount').textContent = `총 ${Math.max(0, cur - 1)}명`;
 }
 
 async function saveAllMembers() {
+  // 모든 행에서 값 읽기
+  const rows = document.querySelectorAll('#mmgmtList .mmgmt-row');
+  const newMembers = {};
+  let hasError = false;
+
+  for (const row of rows) {
+    const nameEl = row.querySelector('[data-field="name"]');
+    const codeEl = row.querySelector('[data-field="code"]');
+    const name = nameEl.value.trim();
+    const code = codeEl.value.trim().toUpperCase();
+
+    if (!name && !code) continue; // 빈 행 무시
+    if (!name) { showToast('이름이 비어있는 항목이 있어요'); nameEl.focus(); hasError = true; break; }
+    if (!code) { showToast('코드가 비어있는 항목이 있어요'); codeEl.focus(); hasError = true; break; }
+    if (newMembers[code]) { showToast(`코드 "${code}"가 중복되어 있어요`); codeEl.focus(); hasError = true; break; }
+    newMembers[code] = name;
+  }
+  if (hasError) return;
+
   showLoading(true);
   try {
+    MEMBERS = newMembers;
     await saveMembersToDB();
-    membersChanged = false;
-    document.getElementById('mmgmtSaveBtn').style.display = 'none';
-    showToast('✓ 회원 목록이 저장되었습니다');
+    renderMemberMgmt();
+    showToast(`✓ ${Object.keys(MEMBERS).length}명 저장 완료`);
   } catch {
     showToast('저장 실패. 인터넷 연결을 확인해주세요.');
   } finally {
     showLoading(false);
   }
-}
-
-function addMember() {
-  const name = document.getElementById('newMemberName').value.trim();
-  const code = document.getElementById('newMemberCode').value.trim().toUpperCase();
-  if (!name) { showToast('이름을 입력해주세요'); return; }
-  if (!code) { showToast('코드를 입력해주세요'); return; }
-  if (MEMBERS[code]) { showToast('이미 사용 중인 코드예요'); return; }
-  MEMBERS[code] = name;
-  hideAddMemberForm();
-  renderMemberMgmt();
-  markMembersChanged();
-  showToast(`${name} 추가됨 — 저장 버튼을 눌러주세요`);
-}
-
-function editMember(code) {
-  const currentName = MEMBERS[code];
-  const newName = prompt(`${currentName} 회원의 이름을 변경합니다`, currentName);
-  if (!newName || newName.trim() === currentName) return;
-  MEMBERS[code] = newName.trim();
-  renderMemberMgmt();
-  markMembersChanged();
-  showToast(`${newName.trim()}으로 변경됨 — 저장 버튼을 눌러주세요`);
-}
-
-function deleteMember(code) {
-  const name = MEMBERS[code];
-  if (!confirm(`${name} (${code}) 회원을 삭제할까요?\n삭제해도 기존 플랜 기록은 남습니다.`)) return;
-  delete MEMBERS[code];
-  renderMemberMgmt();
-  markMembersChanged();
-  showToast(`${name} 삭제됨 — 저장 버튼을 눌러주세요`);
-}
-
-function renderMemberMgmt() {
-  const entries = Object.entries(MEMBERS);
-  document.getElementById('mmgmtCount').textContent = `총 ${entries.length}명`;
-  document.getElementById('mmgmtList').innerHTML = entries.map(([code, name]) => `
-    <div class="mmgmt-row">
-      <div class="mmgmt-avatar">${name.charAt(0)}</div>
-      <div class="mmgmt-info">
-        <div class="mmgmt-name">${name}</div>
-        <div class="mmgmt-code-badge">${code}</div>
-      </div>
-      <div class="mmgmt-actions">
-        <button class="mmgmt-edit-btn" onclick="editMember('${code}')">이름 수정</button>
-        <button class="mmgmt-del-btn" onclick="deleteMember('${code}')">삭제</button>
-      </div>
-    </div>
-  `).join('');
 }
 
 // ═══════════════════ COMMENT PANEL ═══════════════════
