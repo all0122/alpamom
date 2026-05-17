@@ -1160,11 +1160,19 @@ function formatDateKo(dateStr) {
   return `${y}년 ${+m}월 ${+d}일 (${days[dt.getDay()]})`;
 }
 
+function addOneDay(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const next = new Date(Date.UTC(y, m - 1, d + 1));
+  return next.toISOString().split('T')[0];
+}
+
 function getClassDates() {
   const dates = [];
-  const start = new Date(`${CLASS_START}T00:00:00+09:00`);
-  for (let i = 0; i < CLASS_DAYS; i++) {
-    dates.push(new Date(start.getTime() + i * 86400000).toISOString().split('T')[0]);
+  const today = todayKST();
+  let cur = CLASS_START;
+  while (cur <= today) {
+    dates.push(cur);
+    cur = addOneDay(cur);
   }
   return dates;
 }
@@ -1895,7 +1903,8 @@ function renderAdminStats() {
 }
 
 function renderAttendanceGrid() {
-  const classDates  = getClassDates();
+  const allDates    = getClassDates();
+  const classDates  = allDates.slice(-30); // 최근 30일만 표시
   const today       = todayKST();
   const memberCodes = Object.keys(MEMBERS);
   const table       = document.getElementById('attTable');
