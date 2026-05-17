@@ -159,6 +159,7 @@ window.addEventListener('load', function() {
     display: block; font-size: 12px; font-weight: 700;
     color: var(--ink-mid); letter-spacing: 0.05em; margin-bottom: 10px;
   }
+  .login-input-name { text-transform: none !important; letter-spacing: 0.02em !important; font-size: 18px !important; }
   .login-input {
     width: 100%;
     font-family: 'Noto Sans KR', sans-serif;
@@ -593,6 +594,8 @@ window.addEventListener('load', function() {
   .mmgmt-count { font-size: 13px; color: var(--ink-mid); font-weight: 600; }
   .mmgmt-add-btn { padding: 9px 16px; background: var(--sage); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
   .mmgmt-add-btn:active { opacity: 0.8; }
+  .mmgmt-save-all-btn { padding: 9px 16px; background: var(--coral); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; animation: pulse-save 1.2s ease-in-out infinite; }
+  @keyframes pulse-save { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
   .mmgmt-add-form { background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 16px; margin-bottom: 16px; }
   .mmgmt-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
   .mmgmt-label { display: block; font-size: 11px; font-weight: 700; color: var(--ink-mid); letter-spacing: 0.05em; margin-bottom: 6px; }
@@ -782,11 +785,16 @@ window.addEventListener('load', function() {
 <div class="screen" id="screen-login">
   <div class="login-logo">NEW RICH 뉴리치연구소</div>
   <h1 class="login-title">엄마의 돈 공부<br>모닝플랜</h1>
-  <p class="login-sub">멘토님이 발급한 참여 코드를 입력해주세요</p>
+  <p class="login-sub">이름과 멘토님이 발급한 코드를 입력해주세요</p>
   <div class="login-card">
-    <label class="login-label" for="loginInput">참여 코드</label>
+    <label class="login-label" for="loginName">이름</label>
+    <input class="login-input login-input-name" id="loginName" type="text"
+      placeholder="홍길동"
+      autocomplete="off" autocorrect="off" autocapitalize="words"
+      spellcheck="false" maxlength="20" inputmode="text" enterkeyhint="next">
+    <label class="login-label" for="loginInput" style="margin-top:14px;">참여 코드</label>
     <input class="login-input" id="loginInput" type="text"
-      placeholder="예: RICH01"
+      placeholder="예: HONG01"
       autocomplete="off" autocorrect="off" autocapitalize="characters"
       spellcheck="false" maxlength="12" inputmode="text" enterkeyhint="go">
     <button class="login-btn" onclick="handleLogin()">입장하기</button>
@@ -996,7 +1004,10 @@ window.addEventListener('load', function() {
     <div class="admin-page" id="adminPage-members">
       <div class="mmgmt-topbar">
         <span class="mmgmt-count" id="mmgmtCount"></span>
-        <button class="mmgmt-add-btn" onclick="showAddMemberForm()">+ 회원 추가</button>
+        <div style="display:flex;gap:8px;">
+          <button class="mmgmt-save-all-btn" id="mmgmtSaveBtn" onclick="saveAllMembers()" style="display:none;">💾 저장하기</button>
+          <button class="mmgmt-add-btn" onclick="showAddMemberForm()">+ 회원 추가</button>
+        </div>
       </div>
       <div class="mmgmt-add-form" id="mmgmtAddForm" style="display:none;">
         <div class="mmgmt-form-row">
@@ -1186,8 +1197,10 @@ function showToast(msg) {
 
 // ═══════════════════ LOGIN / LOGOUT ═══════════════════
 async function handleLogin() {
-  const code = document.getElementById('loginInput').value.trim().toUpperCase();
-  if (!code) { showToast('코드를 입력해주세요'); return; }
+  const nameInput = document.getElementById('loginName').value.trim();
+  const code      = document.getElementById('loginInput').value.trim().toUpperCase();
+  if (!nameInput) { showToast('이름을 입력해주세요'); return; }
+  if (!code)      { showToast('코드를 입력해주세요'); return; }
 
   // 회원 목록 로딩 보장
   if (!membersLoaded) {
@@ -1206,24 +1219,32 @@ async function handleLogin() {
   }
 
   if (MEMBERS[code]) {
-    let displayName = MEMBERS[code];
+    const registeredName = MEMBERS[code].trim();
+    if (registeredName !== nameInput) {
+      showToast('이름 또는 코드를 확인해주세요');
+      return;
+    }
+    let displayName = registeredName;
     try {
       const profileDoc = await db.collection('plans').doc(`${code}_profile`).get();
       if (profileDoc.exists && profileDoc.data().customName) {
         displayName = profileDoc.data().customName;
       }
-    } catch { /* 네트워크 오류 시 기본 이름 사용 */ }
+    } catch {}
     currentUser = { code, name: displayName, isAdmin: false };
     renderRoster();
     showScreen('screen-roster');
     return;
   }
 
-  showToast('코드를 확인해주세요');
+  showToast('이름 또는 코드를 확인해주세요');
 }
 
 document.getElementById('loginInput').addEventListener('keyup', e => {
   if (e.key === 'Enter') handleLogin();
+});
+document.getElementById('loginName').addEventListener('keyup', e => {
+  if (e.key === 'Enter') document.getElementById('loginInput').focus();
 });
 
 // ═══════════════════ ROSTER SCREEN ═══════════════════
@@ -1271,6 +1292,7 @@ function handleLogout() {
   currentUser = null;
   expenses = [];
   allPlans = {};
+  document.getElementById('loginName').value = '';
   document.getElementById('loginInput').value = '';
   clearMemberFields();
   showScreen('screen-login');
@@ -1287,7 +1309,7 @@ async function initMemberScreen() {
   dateInput.value = today;
 
   memberSwitchTab('write');
-  await loadPlanFromDB(targetDate);
+  await loadPlanFromDB(today);
 }
 
 document.getElementById('planDate').addEventListener('change', async function () {
@@ -1584,60 +1606,57 @@ function hideAddMemberForm() {
   document.getElementById('mmgmtAddForm').style.display = 'none';
 }
 
-async function addMember() {
+let membersChanged = false;
+
+function markMembersChanged() {
+  membersChanged = true;
+  document.getElementById('mmgmtSaveBtn').style.display = 'block';
+}
+
+async function saveAllMembers() {
+  showLoading(true);
+  try {
+    await saveMembersToDB();
+    membersChanged = false;
+    document.getElementById('mmgmtSaveBtn').style.display = 'none';
+    showToast('✓ 회원 목록이 저장되었습니다');
+  } catch {
+    showToast('저장 실패. 인터넷 연결을 확인해주세요.');
+  } finally {
+    showLoading(false);
+  }
+}
+
+function addMember() {
   const name = document.getElementById('newMemberName').value.trim();
   const code = document.getElementById('newMemberCode').value.trim().toUpperCase();
   if (!name) { showToast('이름을 입력해주세요'); return; }
-  if (!code) { showToast('코드를 입력하거나 자동생성 버튼을 눌러주세요'); return; }
+  if (!code) { showToast('코드를 입력해주세요'); return; }
   if (MEMBERS[code]) { showToast('이미 사용 중인 코드예요'); return; }
-  showLoading(true);
-  try {
-    MEMBERS[code] = name;
-    await saveMembersToDB();
-    hideAddMemberForm();
-    renderMemberMgmt();
-    showToast(`✓ ${name} 회원이 추가되었습니다`);
-  } catch {
-    delete MEMBERS[code];
-    showToast('저장 실패. 인터넷 연결을 확인해주세요.');
-  } finally {
-    showLoading(false);
-  }
+  MEMBERS[code] = name;
+  hideAddMemberForm();
+  renderMemberMgmt();
+  markMembersChanged();
+  showToast(`${name} 추가됨 — 저장 버튼을 눌러주세요`);
 }
 
-async function editMember(code) {
+function editMember(code) {
   const currentName = MEMBERS[code];
   const newName = prompt(`${currentName} 회원의 이름을 변경합니다`, currentName);
   if (!newName || newName.trim() === currentName) return;
-  showLoading(true);
-  try {
-    MEMBERS[code] = newName.trim();
-    await saveMembersToDB();
-    renderMemberMgmt();
-    showToast(`✓ ${newName.trim()}으로 이름 변경 완료`);
-  } catch {
-    MEMBERS[code] = currentName;
-    showToast('저장 실패. 인터넷 연결을 확인해주세요.');
-  } finally {
-    showLoading(false);
-  }
+  MEMBERS[code] = newName.trim();
+  renderMemberMgmt();
+  markMembersChanged();
+  showToast(`${newName.trim()}으로 변경됨 — 저장 버튼을 눌러주세요`);
 }
 
-async function deleteMember(code) {
+function deleteMember(code) {
   const name = MEMBERS[code];
   if (!confirm(`${name} (${code}) 회원을 삭제할까요?\n삭제해도 기존 플랜 기록은 남습니다.`)) return;
-  showLoading(true);
-  try {
-    delete MEMBERS[code];
-    await saveMembersToDB();
-    renderMemberMgmt();
-    showToast(`✓ ${name} 회원 삭제 완료`);
-  } catch {
-    MEMBERS[code] = name;
-    showToast('저장 실패. 인터넷 연결을 확인해주세요.');
-  } finally {
-    showLoading(false);
-  }
+  delete MEMBERS[code];
+  renderMemberMgmt();
+  markMembersChanged();
+  showToast(`${name} 삭제됨 — 저장 버튼을 눌러주세요`);
 }
 
 function renderMemberMgmt() {
