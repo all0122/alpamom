@@ -588,6 +588,32 @@ window.addEventListener('load', function() {
   .admin-page { display: none; }
   .admin-page.active { display: block; }
 
+  /* ══ 회원 관리 ══ */
+  .mmgmt-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 12px; }
+  .mmgmt-count { font-size: 13px; color: var(--ink-mid); font-weight: 600; }
+  .mmgmt-add-btn { padding: 9px 16px; background: var(--sage); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+  .mmgmt-add-btn:active { opacity: 0.8; }
+  .mmgmt-add-form { background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 16px; margin-bottom: 16px; }
+  .mmgmt-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .mmgmt-label { display: block; font-size: 11px; font-weight: 700; color: var(--ink-mid); letter-spacing: 0.05em; margin-bottom: 6px; }
+  .mmgmt-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'Noto Sans KR', sans-serif; color: var(--ink); background: var(--cream); outline: none; }
+  .mmgmt-input:focus { border-color: var(--sage); }
+  .mmgmt-code-row { display: flex; gap: 6px; }
+  .mmgmt-code-row .mmgmt-input { flex: 1; }
+  .mmgmt-gen-btn { padding: 0 10px; background: var(--sage-pale); color: var(--sage); border: 1px solid var(--sage-light); border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; font-family: 'Noto Sans KR', sans-serif; }
+  .mmgmt-form-actions { display: flex; gap: 8px; }
+  .mmgmt-save-btn { flex: 1; padding: 12px; background: var(--sage); color: white; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+  .mmgmt-cancel-btn { padding: 12px 18px; background: transparent; color: var(--ink-light); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+  .mmgmt-list { display: flex; flex-direction: column; gap: 8px; }
+  .mmgmt-row { display: flex; align-items: center; background: var(--warm-white); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; gap: 12px; }
+  .mmgmt-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--sage-pale); color: var(--sage); font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mmgmt-info { flex: 1; min-width: 0; }
+  .mmgmt-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .mmgmt-code-badge { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--sage); background: var(--sage-pale); border-radius: 4px; padding: 2px 6px; margin-top: 2px; }
+  .mmgmt-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .mmgmt-edit-btn { padding: 6px 10px; background: var(--cream); color: var(--ink-mid); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+  .mmgmt-del-btn { padding: 6px 10px; background: var(--coral-pale); color: var(--coral); border: 1px solid var(--coral-light); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; }
+
   /* ══ COMMENT PANEL ══ */
   .comment-panel-header {
     display: flex; align-items: center; gap: 12px;
@@ -930,6 +956,7 @@ window.addEventListener('load', function() {
     <div class="admin-nav">
       <button class="admin-nav-tab active" onclick="switchAdminTab('attendance')">📅 출석 현황</button>
       <button class="admin-nav-tab" onclick="switchAdminTab('comments')">💬 코멘트 관리</button>
+      <button class="admin-nav-tab" onclick="switchAdminTab('members')">👥 회원 관리</button>
     </div>
 
     <!-- PAGE: 출석 현황 -->
@@ -963,6 +990,34 @@ window.addEventListener('load', function() {
           <div class="empty-text">날짜를 선택하면<br>회원별 코멘트 입력칸이 나타납니다</div>
         </div>
       </div>
+    </div>
+
+    <!-- PAGE: 회원 관리 -->
+    <div class="admin-page" id="adminPage-members">
+      <div class="mmgmt-topbar">
+        <span class="mmgmt-count" id="mmgmtCount"></span>
+        <button class="mmgmt-add-btn" onclick="showAddMemberForm()">+ 회원 추가</button>
+      </div>
+      <div class="mmgmt-add-form" id="mmgmtAddForm" style="display:none;">
+        <div class="mmgmt-form-row">
+          <div class="mmgmt-form-field">
+            <label class="mmgmt-label">이름</label>
+            <input type="text" class="mmgmt-input" id="newMemberName" placeholder="홍길동" maxlength="20">
+          </div>
+          <div class="mmgmt-form-field">
+            <label class="mmgmt-label">로그인 코드</label>
+            <div class="mmgmt-code-row">
+              <input type="text" class="mmgmt-input" id="newMemberCode" placeholder="예: RICH21" maxlength="12" style="text-transform:uppercase;">
+              <button class="mmgmt-gen-btn" onclick="generateCode()">자동생성</button>
+            </div>
+          </div>
+        </div>
+        <div class="mmgmt-form-actions">
+          <button class="mmgmt-save-btn" onclick="addMember()">추가하기</button>
+          <button class="mmgmt-cancel-btn" onclick="hideAddMemberForm()">취소</button>
+        </div>
+      </div>
+      <div class="mmgmt-list" id="mmgmtList"></div>
     </div>
 
   </div>
@@ -1031,8 +1086,8 @@ const CLASS_START = '2026-04-08'; // ← 클래스 시작일
 const CLASS_DAYS  = 14;           // ← 진행 일수
 const ADMIN_CODE  = 'MENTOR2026'; // ← 멘토 접속 코드
 
-const MEMBERS = {
-  // 코드   : 이름 (코드는 대문자 영문+숫자, 이름은 실명으로 변경하세요)
+let MEMBERS = {
+  // 기본값 (Firestore에 데이터 없을 때 사용)
   'RICH01': '김민정',
   'RICH02': '이수연',
   'RICH03': '박지영',
@@ -1054,6 +1109,7 @@ const MEMBERS = {
   'RICH19': '전보람',
   'RICH20': '고나래',
 };
+let membersLoaded = false;
 // ══════════════════════════════════════════════════════════════
 
 // ── Firebase 초기화 ──
@@ -1065,6 +1121,22 @@ let currentUser = null; // { code, name, isAdmin }
 let expenses    = [];
 let allPlans    = {};   // 관리자 캐시: { 'CODE_DATE': planData }
 let modalInfo   = null; // 현재 열린 모달 { memberCode, date }
+
+// ── 회원 목록 Firestore 로드 ──
+async function loadMembersFromDB() {
+  if (membersLoaded) return;
+  try {
+    const doc = await db.collection('plans').doc('_members_index').get();
+    if (doc.exists && doc.data().members && Object.keys(doc.data().members).length > 0) {
+      MEMBERS = doc.data().members;
+    } else {
+      // 최초 실행: 기존 하드코딩 목록을 Firestore에 저장
+      await db.collection('plans').doc('_members_index').set({ members: MEMBERS });
+    }
+  } catch { /* 네트워크 오류 시 하드코딩 목록 사용 */ }
+  membersLoaded = true;
+}
+loadMembersFromDB();
 
 // ═══════════════════ UTILS ═══════════════════
 function todayKST() {
@@ -1119,6 +1191,13 @@ function showToast(msg) {
 async function handleLogin() {
   const code = document.getElementById('loginInput').value.trim().toUpperCase();
   if (!code) { showToast('코드를 입력해주세요'); return; }
+
+  // 회원 목록 로딩 보장
+  if (!membersLoaded) {
+    showLoading(true);
+    await loadMembersFromDB();
+    showLoading(false);
+  }
 
   if (code === ADMIN_CODE) {
     currentUser = { code: 'ADMIN', name: '멘토', isAdmin: true };
@@ -1477,13 +1556,114 @@ async function cleanupExpense() {
 
 // ═══════════════════ ADMIN TAB ═══════════════════
 function switchAdminTab(tab) {
+  const tabs = ['attendance', 'comments', 'members'];
   document.querySelectorAll('.admin-nav-tab').forEach((btn, i) =>
-    btn.classList.toggle('active',
-      (tab === 'attendance' && i === 0) || (tab === 'comments' && i === 1))
+    btn.classList.toggle('active', tabs[i] === tab)
   );
-  document.getElementById('adminPage-attendance').classList.toggle('active', tab === 'attendance');
-  document.getElementById('adminPage-comments').classList.toggle('active', tab === 'comments');
+  tabs.forEach(t =>
+    document.getElementById(`adminPage-${t}`).classList.toggle('active', t === tab)
+  );
   if (tab === 'comments') initCommentPanel();
+  if (tab === 'members') renderMemberMgmt();
+}
+
+// ═══════════════════ 회원 관리 ═══════════════════
+async function saveMembersToDB() {
+  await db.collection('plans').doc('_members_index').set({ members: MEMBERS });
+}
+
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code;
+  do {
+    code = Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+  } while (MEMBERS[code]);
+  document.getElementById('newMemberCode').value = code;
+}
+
+function showAddMemberForm() {
+  document.getElementById('newMemberName').value = '';
+  document.getElementById('newMemberCode').value = '';
+  document.getElementById('mmgmtAddForm').style.display = 'block';
+  document.getElementById('newMemberName').focus();
+}
+
+function hideAddMemberForm() {
+  document.getElementById('mmgmtAddForm').style.display = 'none';
+}
+
+async function addMember() {
+  const name = document.getElementById('newMemberName').value.trim();
+  const code = document.getElementById('newMemberCode').value.trim().toUpperCase();
+  if (!name) { showToast('이름을 입력해주세요'); return; }
+  if (!code) { showToast('코드를 입력하거나 자동생성 버튼을 눌러주세요'); return; }
+  if (MEMBERS[code]) { showToast('이미 사용 중인 코드예요'); return; }
+  showLoading(true);
+  try {
+    MEMBERS[code] = name;
+    await saveMembersToDB();
+    hideAddMemberForm();
+    renderMemberMgmt();
+    showToast(`✓ ${name} 회원이 추가되었습니다`);
+  } catch {
+    delete MEMBERS[code];
+    showToast('저장 실패. 인터넷 연결을 확인해주세요.');
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function editMember(code) {
+  const currentName = MEMBERS[code];
+  const newName = prompt(`${currentName} 회원의 이름을 변경합니다`, currentName);
+  if (!newName || newName.trim() === currentName) return;
+  showLoading(true);
+  try {
+    MEMBERS[code] = newName.trim();
+    await saveMembersToDB();
+    renderMemberMgmt();
+    showToast(`✓ ${newName.trim()}으로 이름 변경 완료`);
+  } catch {
+    MEMBERS[code] = currentName;
+    showToast('저장 실패. 인터넷 연결을 확인해주세요.');
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function deleteMember(code) {
+  const name = MEMBERS[code];
+  if (!confirm(`${name} (${code}) 회원을 삭제할까요?\n삭제해도 기존 플랜 기록은 남습니다.`)) return;
+  showLoading(true);
+  try {
+    delete MEMBERS[code];
+    await saveMembersToDB();
+    renderMemberMgmt();
+    showToast(`✓ ${name} 회원 삭제 완료`);
+  } catch {
+    MEMBERS[code] = name;
+    showToast('저장 실패. 인터넷 연결을 확인해주세요.');
+  } finally {
+    showLoading(false);
+  }
+}
+
+function renderMemberMgmt() {
+  const entries = Object.entries(MEMBERS);
+  document.getElementById('mmgmtCount').textContent = `총 ${entries.length}명`;
+  document.getElementById('mmgmtList').innerHTML = entries.map(([code, name]) => `
+    <div class="mmgmt-row">
+      <div class="mmgmt-avatar">${name.charAt(0)}</div>
+      <div class="mmgmt-info">
+        <div class="mmgmt-name">${name}</div>
+        <div class="mmgmt-code-badge">${code}</div>
+      </div>
+      <div class="mmgmt-actions">
+        <button class="mmgmt-edit-btn" onclick="editMember('${code}')">이름 수정</button>
+        <button class="mmgmt-del-btn" onclick="deleteMember('${code}')">삭제</button>
+      </div>
+    </div>
+  `).join('');
 }
 
 // ═══════════════════ COMMENT PANEL ═══════════════════
