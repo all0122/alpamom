@@ -1432,20 +1432,20 @@ function switchAdminTab(tab) {
 function initCommentPanel() {
   const sel = document.getElementById('commentDateSelect');
   if (sel.options.length > 1) return; // already initialized
-  const classDates = getClassDates();
   const today = todayKST();
-  const lastClassDate = classDates[classDates.length - 1];
-  let defaultDate = today <= lastClassDate ? today : lastClassDate;
-  classDates.forEach(d => {
+  const startMs = new Date(`${CLASS_START}T00:00:00+09:00`).getTime();
+  const endMs   = new Date(`${today}T00:00:00+09:00`).getTime();
+  const dayNames = ['일','월','화','수','목','금','토'];
+  for (let ms = startMs; ms <= endMs; ms += 86400000) {
+    const d = new Date(ms + 9 * 3600000).toISOString().split('T')[0];
     const opt = document.createElement('option');
     opt.value = d;
-    const [y, m, day] = d.split('-');
     const dt = new Date(`${d}T00:00:00+09:00`);
-    const days = ['일','월','화','수','목','금','토'];
-    opt.textContent = `${+m}월 ${+day}일 (${days[dt.getDay()]})${d > today ? ' — 예정' : ''}`;
-    if (d === defaultDate) opt.selected = true;
+    const [, m, day] = d.split('-');
+    opt.textContent = `${+m}월 ${+day}일 (${dayNames[dt.getDay()]})`;
+    if (d === today) opt.selected = true;
     sel.appendChild(opt);
-  });
+  }
   if (sel.value) loadCommentPanel();
 }
 
