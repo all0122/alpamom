@@ -872,7 +872,7 @@ window.addEventListener('load', function() {
         <div class="admin-title">14일 출석 현황</div>
       </div>
       <div class="admin-header-btns">
-        <button class="refresh-btn" onclick="loadAdminDashboard()">🔄 새로고침</button>
+        <button class="refresh-btn" onclick="refreshAdminDashboard()">🔄 새로고침</button>
         <button class="logout-btn" style="position:static;" onclick="handleLogout()">나가기</button>
       </div>
     </div>
@@ -1076,9 +1076,14 @@ async function handleLogin() {
   if (code === ADMIN_CODE) {
     currentUser = { code: 'ADMIN', name: '멘토', isAdmin: true };
     showLoading(true);
-    await loadAdminDashboard();
-    showLoading(false);
-    showScreen('screen-admin');
+    try {
+      await loadAdminDashboard();
+      showScreen('screen-admin');
+    } catch {
+      showToast('데이터 로드 실패. 인터넷 연결을 확인 후 다시 시도해주세요.');
+    } finally {
+      showLoading(false);
+    }
     return;
   }
 
@@ -1566,26 +1571,33 @@ async function deleteCommentDirect(memberCode, date) {
 }
 
 // ═══════════════════ ADMIN ═══════════════════
-async function loadAdminDashboard() {
+async function refreshAdminDashboard() {
+  showLoading(true);
   try {
-    const [plansSnap, nameDoc] = await Promise.all([
-      db.collection('plans').get(),
-      db.collection('settings').doc('member_names').get()
-    ]);
-    if (nameDoc.exists) {
-      Object.entries(nameDoc.data()).forEach(([code, name]) => {
-        if (code in MEMBERS) MEMBERS[code] = name;
-      });
-    }
-    allPlans = {};
-    plansSnap.forEach(doc => { allPlans[doc.id] = doc.data(); });
-    renderAdminStats();
-    renderAttendanceGrid();
-    const sel = document.getElementById('commentDateSelect');
-    if (sel && sel.value) loadCommentPanel();
+    await loadAdminDashboard();
   } catch {
-    showToast('데이터 불러오기 실패. 인터넷 연결을 확인해주세요.');
+    showToast('새로고침 실패. 인터넷 연결을 확인해주세요.');
+  } finally {
+    showLoading(false);
   }
+}
+
+async function loadAdminDashboard() {
+  const [plansSnap, nameDoc] = await Promise.all([
+    db.collection('plans').get(),
+    db.collection('settings').doc('member_names').get()
+  ]);
+  if (nameDoc.exists) {
+    Object.entries(nameDoc.data()).forEach(([code, name]) => {
+      if (code in MEMBERS) MEMBERS[code] = name;
+    });
+  }
+  allPlans = {};
+  plansSnap.forEach(doc => { allPlans[doc.id] = doc.data(); });
+  renderAdminStats();
+  renderAttendanceGrid();
+  const sel = document.getElementById('commentDateSelect');
+  if (sel && sel.value) loadCommentPanel();
 }
 
 function renderAdminStats() {
