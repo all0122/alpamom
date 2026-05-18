@@ -1667,7 +1667,8 @@ async function saveMemberList() {
     renderAttendanceGrid();
     showToast('회원 목록이 저장되었습니다 ✓');
   } catch (e) {
-    showToast('저장 실패. 다시 시도해주세요.');
+    console.error('saveMemberList error:', e);
+    showToast('저장 실패: ' + (e.code || e.message || '알 수 없는 오류'));
   } finally {
     showLoading(false);
   }
