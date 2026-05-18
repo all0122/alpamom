@@ -975,9 +975,18 @@ window.addEventListener('load', function() {
         <div class="cfg-desc">2주(14일) 프로그램의 첫 번째 날짜를 설정합니다. 저장 후 즉시 반영됩니다.</div>
         <div class="cfg-row">
           <input type="date" class="cfg-input" id="cfgStartDate">
-          <button class="cfg-save-btn" onclick="saveSettings()">저장</button>
+          <button class="cfg-save-btn" onclick="saveStartDate()">저장</button>
         </div>
         <div class="cfg-current" id="cfgCurrentInfo"></div>
+      </div>
+      <div class="cfg-section">
+        <div class="cfg-title">🔑 관리자 접속 코드</div>
+        <div class="cfg-desc">관리자 로그인에 사용할 코드를 변경합니다. 변경 후 다음 로그인부터 적용됩니다.</div>
+        <div class="cfg-row">
+          <input type="text" class="cfg-input" id="cfgAdminCode" placeholder="새 관리자 코드" autocomplete="off" style="text-transform:uppercase">
+          <button class="cfg-save-btn" onclick="saveAdminCode()">저장</button>
+        </div>
+        <div class="cfg-current" id="cfgAdminCodeInfo"></div>
       </div>
     </div>
 
@@ -1045,7 +1054,7 @@ const FIREBASE_CONFIG = {
 
 let CLASS_START = '2026-04-08'; // ← Firebase settings/config 로 덮어씀
 const CLASS_DAYS  = 14;           // ← 진행 일수 (2주 고정)
-const ADMIN_CODE  = 'MENTOR2026'; // ← 멘토 접속 코드
+let ADMIN_CODE  = 'MENTOR2026'; // ← Firebase settings/config 로 덮어씀
 
 const MEMBERS = {};  // 관리자 페이지 [회원 관리] 탭에서 추가/수정/삭제
 // ══════════════════════════════════════════════════════════════
@@ -1644,7 +1653,9 @@ function initSettingsTab() {
   const [y, m, d] = CLASS_START.split('-');
   document.getElementById('cfgStartDate').value = CLASS_START;
   document.getElementById('cfgCurrentInfo').textContent =
-    `현재 설정: ${+y}년 ${+m}월 ${+d}일 시작 · 14일 과정 (종료: ${getEndDateStr()})`;
+    `현재: ${+y}년 ${+m}월 ${+d}일 시작 · 14일 과정 (종료: ${getEndDateStr()})`;
+  document.getElementById('cfgAdminCode').value = '';
+  document.getElementById('cfgAdminCodeInfo').textContent = `현재 코드: ${ADMIN_CODE}`;
 }
 
 function getEndDateStr() {
@@ -1654,17 +1665,35 @@ function getEndDateStr() {
   return `${+y}년 ${+m}월 ${+d}일`;
 }
 
-async function saveSettings() {
+async function saveStartDate() {
   const val = document.getElementById('cfgStartDate').value;
   if (!val) { showToast('시작일을 선택해주세요'); return; }
   showLoading(true);
   try {
-    await db.collection('settings').doc('config').set({ startDate: val });
+    await db.collection('settings').doc('config').set({ startDate: val, adminCode: ADMIN_CODE }, { merge: true });
     CLASS_START = val;
     initSettingsTab();
     renderAdminStats();
     renderAttendanceGrid();
-    showToast('설정이 저장되었습니다 ✓');
+    showToast('시작일이 저장되었습니다 ✓');
+  } catch (e) {
+    showToast('저장 실패: ' + (e.code || e.message));
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function saveAdminCode() {
+  const val = document.getElementById('cfgAdminCode').value.trim().toUpperCase();
+  if (!val) { showToast('새 코드를 입력해주세요'); return; }
+  if (val.length < 4) { showToast('코드는 4자 이상으로 설정해주세요'); return; }
+  showLoading(true);
+  try {
+    await db.collection('settings').doc('config').set({ adminCode: val, startDate: CLASS_START }, { merge: true });
+    ADMIN_CODE = val;
+    sessionStorage.setItem('sessionCode', val);
+    initSettingsTab();
+    showToast('관리자 코드가 변경되었습니다 ✓');
   } catch (e) {
     showToast('저장 실패: ' + (e.code || e.message));
   } finally {
@@ -1743,7 +1772,10 @@ async function loadAdminDashboard() {
     db.collection('settings').doc('members').get(),
     db.collection('settings').doc('config').get()
   ]);
-  if (configDoc.exists && configDoc.data().startDate) CLASS_START = configDoc.data().startDate;
+  if (configDoc.exists) {
+    if (configDoc.data().startDate) CLASS_START = configDoc.data().startDate;
+    if (configDoc.data().adminCode) ADMIN_CODE = configDoc.data().adminCode;
+  }
   if (membersDoc.exists) {
     Object.keys(MEMBERS).forEach(k => delete MEMBERS[k]);
     Object.entries(membersDoc.data()).forEach(([code, name]) => { MEMBERS[code] = name; });
@@ -1978,7 +2010,10 @@ window.addEventListener('load', async () => {
       db.collection('settings').doc('members').get(),
       db.collection('settings').doc('config').get()
     ]);
-    if (configDoc.exists && configDoc.data().startDate) CLASS_START = configDoc.data().startDate;
+    if (configDoc.exists) {
+      if (configDoc.data().startDate) CLASS_START = configDoc.data().startDate;
+      if (configDoc.data().adminCode) ADMIN_CODE = configDoc.data().adminCode;
+    }
     if (membersDoc.exists) {
       Object.keys(MEMBERS).forEach(k => delete MEMBERS[k]);
       Object.entries(membersDoc.data()).forEach(([code, name]) => { MEMBERS[code] = name; });
