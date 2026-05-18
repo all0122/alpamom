@@ -1607,9 +1607,13 @@ async function saveCommentDirect(memberCode, date) {
     renderAdminStats();
     renderAttendanceGrid();
     showToast(`✓ ${MEMBERS[memberCode]} 님 코멘트 저장!`);
-    await loadCommentPanel(); // refresh panel
-  } catch {
-    showToast('저장 실패. 인터넷 연결을 확인해주세요.');
+    await loadCommentPanel();
+    // 저장 후 해당 카드 자동으로 다시 열기
+    const expand = document.getElementById(`cmExpand-${memberCode}`);
+    const toggle = document.getElementById(`cmToggle-${memberCode}`);
+    if (expand) { expand.classList.add('open'); toggle?.classList.add('open'); }
+  } catch (e) {
+    showToast('저장 실패: ' + (e.code || e.message || '인터넷 연결을 확인해주세요'));
   } finally {
     showLoading(false);
   }
@@ -1629,8 +1633,11 @@ async function deleteCommentDirect(memberCode, date) {
     renderAttendanceGrid();
     showToast('코멘트가 삭제되었습니다.');
     await loadCommentPanel();
-  } catch {
-    showToast('삭제 실패. 인터넷 연결을 확인해주세요.');
+    const expand = document.getElementById(`cmExpand-${memberCode}`);
+    const toggle = document.getElementById(`cmToggle-${memberCode}`);
+    if (expand) { expand.classList.add('open'); toggle?.classList.add('open'); }
+  } catch (e) {
+    showToast('삭제 실패: ' + (e.code || e.message || '인터넷 연결을 확인해주세요'));
   } finally {
     showLoading(false);
   }
