@@ -1757,15 +1757,16 @@ async function loadAdminDashboard() {
 }
 
 function renderAdminStats() {
-  const gridDates    = getGridDates();
+  const classDates   = getClassDates();
   const today        = todayKST();
   const memberCodes  = Object.keys(MEMBERS);
+  const pastDates    = classDates.filter(d => d <= today);
 
   const todayWriters  = memberCodes.filter(c => hasMeaningfulContent(allPlans[docId(c, today)]));
   const perfectMems   = memberCodes.filter(c =>
-    gridDates.length > 0 && gridDates.every(d => hasMeaningfulContent(allPlans[docId(c, d)]))
+    pastDates.length > 0 && pastDates.every(d => hasMeaningfulContent(allPlans[docId(c, d)]))
   );
-  const pendingCmt    = gridDates.reduce((n, d) =>
+  const pendingCmt    = classDates.reduce((n, d) =>
     n + memberCodes.filter(c => {
       const p = allPlans[docId(c,d)];
       return hasMeaningfulContent(p) && !p.mentorComment;
@@ -1803,7 +1804,7 @@ function getGridDates() {
 }
 
 function renderAttendanceGrid() {
-  const classDates  = getGridDates();
+  const classDates  = getClassDates();
   const today       = todayKST();
   const memberCodes = Object.keys(MEMBERS);
   const table       = document.getElementById('attTable');
