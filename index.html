@@ -1020,29 +1020,7 @@ const CLASS_START = '2026-04-08'; // ← 클래스 시작일
 const CLASS_DAYS  = 14;           // ← 진행 일수
 const ADMIN_CODE  = 'MENTOR2026'; // ← 멘토 접속 코드
 
-const MEMBERS = {
-  // 코드   : 이름 (코드는 대문자 영문+숫자, 이름은 실명으로 변경하세요)
-  'RICH01': '김민정',
-  'RICH02': '이수연',
-  'RICH03': '박지영',
-  'RICH04': '최은주',
-  'RICH05': '정미라',
-  'RICH06': '강현숙',
-  'RICH07': '윤지혜',
-  'RICH08': '임선영',
-  'RICH09': '한소희',
-  'RICH10': '오유진',
-  'RICH11': '서민경',
-  'RICH12': '배지수',
-  'RICH13': '장혜란',
-  'RICH14': '신미영',
-  'RICH15': '류소연',
-  'RICH16': '안정희',
-  'RICH17': '황은별',
-  'RICH18': '송지현',
-  'RICH19': '전보람',
-  'RICH20': '고나래',
-};
+const MEMBERS = {};  // 관리자 페이지 [회원 관리] 탭에서 추가/수정/삭제
 // ══════════════════════════════════════════════════════════════
 
 // ── Firebase 초기화 ──
@@ -1456,6 +1434,8 @@ function initCommentPanel() {
   if (sel.options.length > 1) return; // already initialized
   const classDates = getClassDates();
   const today = todayKST();
+  const lastClassDate = classDates[classDates.length - 1];
+  let defaultDate = today <= lastClassDate ? today : lastClassDate;
   classDates.forEach(d => {
     const opt = document.createElement('option');
     opt.value = d;
@@ -1463,7 +1443,7 @@ function initCommentPanel() {
     const dt = new Date(`${d}T00:00:00+09:00`);
     const days = ['일','월','화','수','목','금','토'];
     opt.textContent = `${+m}월 ${+day}일 (${days[dt.getDay()]})${d > today ? ' — 예정' : ''}`;
-    if (d === today) opt.selected = true;
+    if (d === defaultDate) opt.selected = true;
     sel.appendChild(opt);
   });
   if (sel.value) loadCommentPanel();
@@ -1686,20 +1666,13 @@ async function saveMemberList() {
 }
 
 async function loadAdminDashboard() {
-  const [plansSnap, nameDoc, membersDoc] = await Promise.all([
+  const [plansSnap, membersDoc] = await Promise.all([
     db.collection('plans').get(),
-    db.collection('settings').doc('member_names').get(),
     db.collection('settings').doc('members').get()
   ]);
-  // settings/members 우선 적용 (admin-managed list)
   if (membersDoc.exists) {
     Object.keys(MEMBERS).forEach(k => delete MEMBERS[k]);
     Object.entries(membersDoc.data()).forEach(([code, name]) => { MEMBERS[code] = name; });
-  } else if (nameDoc.exists) {
-    // 레거시 이름 덮어쓰기
-    Object.entries(nameDoc.data()).forEach(([code, name]) => {
-      if (code in MEMBERS) MEMBERS[code] = name;
-    });
   }
   allPlans = {};
   plansSnap.forEach(doc => { allPlans[doc.id] = doc.data(); });
