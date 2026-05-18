@@ -1129,10 +1129,9 @@ async function initMemberScreen() {
   const dateInput  = document.getElementById('planDate');
 
   dateInput.min = CLASS_START;
-  dateInput.max = lastDate;
+  dateInput.max = today;
 
-  const targetDate = today >= CLASS_START && today <= lastDate ? today
-    : today < CLASS_START ? CLASS_START : lastDate;
+  const targetDate = today >= CLASS_START ? today : CLASS_START;
   dateInput.value = targetDate;
 
   memberSwitchTab('write');
