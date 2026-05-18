@@ -1085,8 +1085,8 @@ function showToast(msg) {
 }
 
 // ═══════════════════ LOGIN / LOGOUT ═══════════════════
-async function handleLogin() {
-  const code = document.getElementById('loginInput').value.trim().toUpperCase();
+async function handleLogin(code) {
+  if (!code) code = document.getElementById('loginInput').value.trim().toUpperCase();
   if (!code) { showToast('코드를 입력해주세요'); return; }
 
   if (code === ADMIN_CODE) {
@@ -1099,6 +1099,7 @@ async function handleLogin() {
     } finally {
       showLoading(false);
     }
+    sessionStorage.setItem('sessionCode', ADMIN_CODE);
     showScreen('screen-admin');
     return;
   }
@@ -1114,6 +1115,7 @@ async function handleLogin() {
     } finally {
       showLoading(false);
     }
+    sessionStorage.setItem('sessionCode', code);
     await initMemberScreen();
     showScreen('screen-member');
     return;
@@ -1130,6 +1132,8 @@ function handleLogout() {
   currentUser = null;
   expenses = [];
   allPlans = {};
+  sessionStorage.removeItem('sessionCode');
+  sessionStorage.removeItem('sessionDate');
   document.getElementById('loginInput').value = '';
   clearMemberFields();
   showScreen('screen-login');
@@ -1146,7 +1150,10 @@ async function initMemberScreen() {
   dateInput.min = CLASS_START;
   dateInput.max = today;
 
-  const targetDate = today >= CLASS_START ? today : CLASS_START;
+  const savedDate = sessionStorage.getItem('sessionDate');
+  const targetDate = (savedDate && savedDate >= CLASS_START && savedDate <= today)
+    ? savedDate
+    : (today >= CLASS_START ? today : CLASS_START);
   dateInput.value = targetDate;
 
   memberSwitchTab('write');
@@ -1154,6 +1161,7 @@ async function initMemberScreen() {
 }
 
 document.getElementById('planDate').addEventListener('change', async function () {
+  sessionStorage.setItem('sessionDate', this.value);
   await loadPlanFromDB(this.value);
 });
 
@@ -1893,7 +1901,6 @@ function renderFooterQuote() {
 }
 
 window.addEventListener('load', async () => {
-  showScreen('screen-login');
   renderFooterQuote();
   try {
     const membersDoc = await db.collection('settings').doc('members').get();
@@ -1901,7 +1908,14 @@ window.addEventListener('load', async () => {
       Object.keys(MEMBERS).forEach(k => delete MEMBERS[k]);
       Object.entries(membersDoc.data()).forEach(([code, name]) => { MEMBERS[code] = name; });
     }
-  } catch (_) { /* 오프라인이어도 하드코딩 목록으로 작동 */ }
+  } catch (_) { /* 오프라인이어도 작동 */ }
+
+  const savedCode = sessionStorage.getItem('sessionCode');
+  if (savedCode) {
+    await handleLogin(savedCode);
+  } else {
+    showScreen('screen-login');
+  }
 });
 </script>
 </body>
