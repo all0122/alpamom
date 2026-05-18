@@ -1693,16 +1693,15 @@ async function loadAdminDashboard() {
 }
 
 function renderAdminStats() {
-  const classDates   = getClassDates();
+  const gridDates    = getGridDates();
   const today        = todayKST();
   const memberCodes  = Object.keys(MEMBERS);
-  const pastDates    = classDates.filter(d => d <= today);
 
   const todayWriters  = memberCodes.filter(c => hasMeaningfulContent(allPlans[docId(c, today)]));
   const perfectMems   = memberCodes.filter(c =>
-    pastDates.length > 0 && pastDates.every(d => hasMeaningfulContent(allPlans[docId(c, d)]))
+    gridDates.length > 0 && gridDates.every(d => hasMeaningfulContent(allPlans[docId(c, d)]))
   );
-  const pendingCmt    = classDates.reduce((n, d) =>
+  const pendingCmt    = gridDates.reduce((n, d) =>
     n + memberCodes.filter(c => {
       const p = allPlans[docId(c,d)];
       return hasMeaningfulContent(p) && !p.mentorComment;
@@ -1728,8 +1727,19 @@ function renderAdminStats() {
   `;
 }
 
+function getGridDates() {
+  const today = todayKST();
+  const startMs = new Date(`${CLASS_START}T00:00:00+09:00`).getTime();
+  const endMs   = new Date(`${today}T00:00:00+09:00`).getTime();
+  const dates = [];
+  for (let ms = startMs; ms <= endMs; ms += 86400000) {
+    dates.push(new Date(ms + 9 * 3600000).toISOString().split('T')[0]);
+  }
+  return dates;
+}
+
 function renderAttendanceGrid() {
-  const classDates  = getClassDates();
+  const classDates  = getGridDates();
   const today       = todayKST();
   const memberCodes = Object.keys(MEMBERS);
   const table       = document.getElementById('attTable');
