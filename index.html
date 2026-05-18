@@ -1702,7 +1702,6 @@ function renderAdminStats() {
   const perfectMems   = memberCodes.filter(c =>
     pastDates.length > 0 && pastDates.every(d => hasMeaningfulContent(allPlans[docId(c, d)]))
   );
-  const totalPlans    = Object.values(allPlans).filter(hasMeaningfulContent).length;
   const pendingCmt    = classDates.reduce((n, d) =>
     n + memberCodes.filter(c => {
       const p = allPlans[docId(c,d)];
@@ -1720,11 +1719,6 @@ function renderAdminStats() {
       <div class="admin-stat-num">${perfectMems.length}</div>
       <div class="admin-stat-sub">명</div>
       <div class="admin-stat-label">개근 유지 중 🌟</div>
-    </div>
-    <div class="admin-stat">
-      <div class="admin-stat-num">${totalPlans}</div>
-      <div class="admin-stat-sub">개</div>
-      <div class="admin-stat-label">누적 플랜</div>
     </div>
     <div class="admin-stat">
       <div class="admin-stat-num">${pendingCmt}</div>
