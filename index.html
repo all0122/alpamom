@@ -1060,8 +1060,9 @@ function getClassDates() {
 
 function hasMeaningfulContent(plan) {
   if (!plan) return false;
-  return !!(plan.f1 || plan.f3 || plan.f4 || plan.f5 || plan.f6 || plan.f7 ||
-            plan.d1 || plan.d2 || plan.d3 || (plan.expenses && plan.expenses.length));
+  const fields = [plan.f1, plan.f3, plan.f4, plan.f5, plan.f6, plan.f7, plan.d1, plan.d2, plan.d3];
+  const filled = fields.filter(v => v && String(v).trim()).length;
+  return filled >= Math.ceil(fields.length * 2 / 3); // 9개 중 6개 이상
 }
 
 function docId(code, date) { return `${code}_${date}`; }
