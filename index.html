@@ -1035,9 +1035,10 @@ function formatDateKo(dateStr) {
 
 function getClassDates() {
   const dates = [];
-  const start = new Date(`${CLASS_START}T00:00:00+09:00`);
+  const startMs = new Date(`${CLASS_START}T00:00:00+09:00`).getTime();
   for (let i = 0; i < CLASS_DAYS; i++) {
-    dates.push(new Date(start.getTime() + i * 86400000).toISOString().split('T')[0]);
+    // +9시간 보정으로 KST 날짜 기준 추출
+    dates.push(new Date(startMs + i * 86400000 + 9 * 3600000).toISOString().split('T')[0]);
   }
   return dates;
 }
@@ -1078,12 +1079,12 @@ async function handleLogin() {
     showLoading(true);
     try {
       await loadAdminDashboard();
-      showScreen('screen-admin');
     } catch {
-      showToast('데이터 로드 실패. 인터넷 연결을 확인 후 다시 시도해주세요.');
+      showToast('데이터 불러오기 실패. 새로고침 버튼을 눌러주세요.');
     } finally {
       showLoading(false);
     }
+    showScreen('screen-admin');
     return;
   }
 
