@@ -578,6 +578,19 @@ window.addEventListener('load', function() {
   .mmgmt-del-btn { width: 36px; height: 36px; border: 1px solid var(--border); background: transparent; border-radius: 50%; cursor: pointer; font-size: 14px; color: var(--ink-light); display: flex; align-items: center; justify-content: center; touch-action: manipulation; flex-shrink: 0; }
   .mmgmt-del-btn:active { background: var(--coral-pale); border-color: var(--coral-light); color: var(--coral); }
 
+  /* ══ SETTINGS ══ */
+  .cfg-section { padding: 20px 0 12px; border-bottom: 1px solid var(--border); }
+  .cfg-section:last-child { border-bottom: none; }
+  .cfg-label { font-size: 12px; color: var(--ink-light); margin-bottom: 6px; }
+  .cfg-title { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+  .cfg-desc  { font-size: 12px; color: var(--ink-mid); margin-bottom: 12px; }
+  .cfg-row   { display: flex; gap: 8px; align-items: center; }
+  .cfg-input { padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 14px; font-family: 'Noto Sans KR', sans-serif; color: var(--ink); background: var(--warm-white); outline: none; box-sizing: border-box; -webkit-appearance: none; }
+  .cfg-input:focus { border-color: var(--sage); }
+  .cfg-save-btn { padding: 10px 20px; background: var(--coral); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; white-space: nowrap; }
+  .cfg-save-btn:active { opacity: 0.8; }
+  .cfg-current { font-size: 12px; color: var(--ink-mid); margin-top: 8px; }
+
   /* ══ COMMENT PANEL ══ */
   .comment-panel-header {
     display: flex; align-items: center; gap: 12px;
@@ -902,6 +915,7 @@ window.addEventListener('load', function() {
       <button class="admin-nav-tab active" onclick="switchAdminTab('attendance')">📅 출석 현황</button>
       <button class="admin-nav-tab" onclick="switchAdminTab('comments')">💬 코멘트 관리</button>
       <button class="admin-nav-tab" onclick="switchAdminTab('members')">👤 회원 관리</button>
+      <button class="admin-nav-tab" onclick="switchAdminTab('settings')">⚙️ 설정</button>
     </div>
 
     <!-- PAGE: 출석 현황 -->
@@ -952,6 +966,19 @@ window.addEventListener('load', function() {
         <span></span>
       </div>
       <div class="mmgmt-list" id="mmgmtList"></div>
+    </div>
+
+    <!-- PAGE: 설정 -->
+    <div class="admin-page" id="adminPage-settings">
+      <div class="cfg-section">
+        <div class="cfg-title">📅 프로그램 시작일</div>
+        <div class="cfg-desc">2주(14일) 프로그램의 첫 번째 날짜를 설정합니다. 저장 후 즉시 반영됩니다.</div>
+        <div class="cfg-row">
+          <input type="date" class="cfg-input" id="cfgStartDate">
+          <button class="cfg-save-btn" onclick="saveSettings()">저장</button>
+        </div>
+        <div class="cfg-current" id="cfgCurrentInfo"></div>
+      </div>
     </div>
 
   </div>
@@ -1016,8 +1043,8 @@ const FIREBASE_CONFIG = {
   appId:             "1:573211091071:web:3a01db7bab268bc6a69f4a"
 };
 
-const CLASS_START = '2026-04-08'; // ← 클래스 시작일
-const CLASS_DAYS  = 14;           // ← 진행 일수
+let CLASS_START = '2026-04-08'; // ← Firebase settings/config 로 덮어씀
+const CLASS_DAYS  = 14;           // ← 진행 일수 (2주 고정)
 const ADMIN_CODE  = 'MENTOR2026'; // ← 멘토 접속 코드
 
 const MEMBERS = {};  // 관리자 페이지 [회원 관리] 탭에서 추가/수정/삭제
@@ -1428,13 +1455,15 @@ async function cleanupExpense() {
 function switchAdminTab(tab) {
   document.querySelectorAll('.admin-nav-tab').forEach((btn, i) =>
     btn.classList.toggle('active',
-      (tab === 'attendance' && i === 0) || (tab === 'comments' && i === 1) || (tab === 'members' && i === 2))
+      (tab === 'attendance' && i === 0) || (tab === 'comments' && i === 1) ||
+      (tab === 'members' && i === 2) || (tab === 'settings' && i === 3))
   );
-  document.getElementById('adminPage-attendance').classList.toggle('active', tab === 'attendance');
-  document.getElementById('adminPage-comments').classList.toggle('active', tab === 'comments');
-  document.getElementById('adminPage-members').classList.toggle('active', tab === 'members');
+  ['attendance','comments','members','settings'].forEach(t =>
+    document.getElementById(`adminPage-${t}`).classList.toggle('active', tab === t)
+  );
   if (tab === 'comments') initCommentPanel();
   if (tab === 'members') initMemberManagement();
+  if (tab === 'settings') initSettingsTab();
 }
 
 // ═══════════════════ COMMENT PANEL ═══════════════════
@@ -1610,6 +1639,39 @@ async function refreshAdminDashboard() {
   }
 }
 
+// ═══════════════════ SETTINGS ═══════════════════
+function initSettingsTab() {
+  const [y, m, d] = CLASS_START.split('-');
+  document.getElementById('cfgStartDate').value = CLASS_START;
+  document.getElementById('cfgCurrentInfo').textContent =
+    `현재 설정: ${+y}년 ${+m}월 ${+d}일 시작 · 14일 과정 (종료: ${getEndDateStr()})`;
+}
+
+function getEndDateStr() {
+  const endMs = new Date(`${CLASS_START}T00:00:00+09:00`).getTime() + (CLASS_DAYS - 1) * 86400000;
+  const end = new Date(endMs + 9 * 3600000).toISOString().split('T')[0];
+  const [y, m, d] = end.split('-');
+  return `${+y}년 ${+m}월 ${+d}일`;
+}
+
+async function saveSettings() {
+  const val = document.getElementById('cfgStartDate').value;
+  if (!val) { showToast('시작일을 선택해주세요'); return; }
+  showLoading(true);
+  try {
+    await db.collection('settings').doc('config').set({ startDate: val });
+    CLASS_START = val;
+    initSettingsTab();
+    renderAdminStats();
+    renderAttendanceGrid();
+    showToast('설정이 저장되었습니다 ✓');
+  } catch (e) {
+    showToast('저장 실패: ' + (e.code || e.message));
+  } finally {
+    showLoading(false);
+  }
+}
+
 // ═══════════════════ MEMBER MANAGEMENT ═══════════════════
 function initMemberManagement() {
   memberListDraft = Object.entries(MEMBERS).map(([code, name]) => ({ code, name, isNew: false }));
@@ -1676,10 +1738,12 @@ async function saveMemberList() {
 }
 
 async function loadAdminDashboard() {
-  const [plansSnap, membersDoc] = await Promise.all([
+  const [plansSnap, membersDoc, configDoc] = await Promise.all([
     db.collection('plans').get(),
-    db.collection('settings').doc('members').get()
+    db.collection('settings').doc('members').get(),
+    db.collection('settings').doc('config').get()
   ]);
+  if (configDoc.exists && configDoc.data().startDate) CLASS_START = configDoc.data().startDate;
   if (membersDoc.exists) {
     Object.keys(MEMBERS).forEach(k => delete MEMBERS[k]);
     Object.entries(membersDoc.data()).forEach(([code, name]) => { MEMBERS[code] = name; });
@@ -1909,7 +1973,11 @@ function renderFooterQuote() {
 window.addEventListener('load', async () => {
   renderFooterQuote();
   try {
-    const membersDoc = await db.collection('settings').doc('members').get();
+    const [membersDoc, configDoc] = await Promise.all([
+      db.collection('settings').doc('members').get(),
+      db.collection('settings').doc('config').get()
+    ]);
+    if (configDoc.exists && configDoc.data().startDate) CLASS_START = configDoc.data().startDate;
     if (membersDoc.exists) {
       Object.keys(MEMBERS).forEach(k => delete MEMBERS[k]);
       Object.entries(membersDoc.data()).forEach(([code, name]) => { MEMBERS[code] = name; });
